@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHW Reports | Barangay 86ers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="profile-card">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='none'%3E%3Crect width='200' height='200' rx='100' fill='%23cddffe'/%3E%3Cpath d='M100 108c-19.9 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.1 36-36 36zm0 18c-24 0-72 12.1-72 36v9c0 5 4 9 9 9h126c5 0 9-4 9-9v-9c0-23.9-48-36-72-36z' fill='%238aa8d8'/%3E%3C/svg%3E" alt="" aria-hidden="true" loading="lazy">
+                <h2>Juan Dela Cruz</h2>
+                <p>Barangay Health Worker</p>
+                <a class="profile-link" href="bhw-profile.html">View Profile</a>
+            </div>
+            <nav class="sidebar-nav" aria-label="Primary">
+                <a href="bhw-dashboard.html" class="nav-item">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">Dashboard</span>
+                </a>
+                <a href="medicine-inventory.html" class="nav-item">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 4h4a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" />
+                            <path d="M7 12h8" />
+                            <path d="M15 6h2a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-2" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">Medicine Inventory</span>
+                </a>
+                <a href="residents-maintenance.html" class="nav-item">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="6" r="3" />
+                            <path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                            <rect x="3" y="10" width="5" height="7" rx="1.2" />
+                            <path d="M5.5 11.5v4" />
+                            <path d="M4 13.5h3" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">Residents' Maintenance</span>
+                </a>
+                <a href="reports.html" class="nav-item is-active">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 20v-6" />
+                            <path d="M12 20V8" />
+                            <path d="M18 20v-10" />
+                            <path d="M4 20h16" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">Reports</span>
+                </a>
+                <a href="about.html" class="nav-item">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 8v5" />
+                            <path d="M12 16h0" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">About</span>
+                </a>
+            </nav>
+            <button class="logout-btn" onclick="location.href='index.html'">
+                <span class="logout-btn__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2v-2" />
+                        <path d="M14 12H3" />
+                        <path d="M6 9l-3 3 3 3" />
+                    </svg>
+                </span>
+                <span>Logout</span>
+            </button>
+        </aside>
+
+        <main class="reports-content">
+            <header class="reports-header">
+                <img src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
+                <div>
+                    <h1>Barangay Health and Demographic Record Management System</h1>
+                </div>
+                <button class="user-pill" aria-label="User menu">
+                    <span>JD</span>
+                </button>
+            </header>
+
+            <section class="reports-section" aria-labelledby="reports-title">
+                <div class="reports-title-row">
+                    <h2 id="reports-title">Summary Reports</h2>
+                    <button class="export-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Export as PDF
+                    </button>
+                </div>
+
+                <!-- Two side-by-side report tables -->
+                <div class="report-tables">
+                    <!-- Medicine Inventory Status -->
+                    <div class="report-card">
+                        <h3>Medicine Inventory Status</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Medicine Name</th>
+                                    <th>Qty.</th>
+                                    <th>Availability</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Ceterizine</td>
+                                    <td>10</td>
+                                    <td>Low Stock</td>
+                                </tr>
+                                <tr>
+                                    <td>Salbutamol</td>
+                                    <td>35</td>
+                                    <td>In Stock</td>
+                                </tr>
+                                <tr>
+                                    <td>Losartan</td>
+                                    <td>0</td>
+                                    <td>Out of Stock</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Medicine Distribution Report -->
+                    <div class="report-card">
+                        <h3>Medicine Distribution Report</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Resident Name</th>
+                                    <th>Medicine Name</th>
+                                    <th>Qty.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>05/15/26</td>
+                                    <td>Scheza Mhae Fernando</td>
+                                    <td>Paracetamol</td>
+                                    <td>15</td>
+                                </tr>
+                                <tr>
+                                    <td>07/24/26</td>
+                                    <td>Gian Carlo Dimaranan</td>
+                                    <td>Insulin</td>
+                                    <td>3</td>
+                                </tr>
+                                <tr>
+                                    <td>10/05/26</td>
+                                    <td>Jeoffrey Delos Reyes</td>
+                                    <td>Antibiotic</td>
+                                    <td>5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bar Chart: Medicine Inventory Status -->
+                <div class="report-chart-card">
+                    <h3>Medicine Inventory Status</h3>
+                    <div class="report-bar-chart">
+                        <span class="report-bar-chart__y-label">Medicines Distributed</span>
+                        <div class="report-bar-chart__y">
+                            <span>130</span>
+                            <span>110</span>
+                            <span>90</span>
+                            <span>70</span>
+                            <span>50</span>
+                            <span>30</span>
+                            <span>10</span>
+                        </div>
+                        <div class="report-bar-chart__bars">
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 58%;"></div>
+                                <span class="report-bar__label">January</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 65%;"></div>
+                                <span class="report-bar__label">February</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 72%;"></div>
+                                <span class="report-bar__label">March</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 78%;"></div>
+                                <span class="report-bar__label">April</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 90%;"></div>
+                                <span class="report-bar__label">May</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 52%;"></div>
+                                <span class="report-bar__label">June</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 68%;"></div>
+                                <span class="report-bar__label">July</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 20%;"></div>
+                                <span class="report-bar__label">August</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 15%;"></div>
+                                <span class="report-bar__label">September</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 55%;"></div>
+                                <span class="report-bar__label">October</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 62%;"></div>
+                                <span class="report-bar__label">November</span>
+                            </div>
+                            <div class="report-bar">
+                                <div class="report-bar__fill" style="height: 70%;"></div>
+                                <span class="report-bar__label">December</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

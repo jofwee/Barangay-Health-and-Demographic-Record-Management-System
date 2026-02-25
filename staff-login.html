@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In as Staff | Barangay 86ers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-body">
+    <main class="auth" role="region" aria-label="Sign In as Staff">
+        <section class="auth-card">
+            <img class="auth-card__logo" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
+            <h1>Sign In as Staff</h1>
+            <form class="auth-form" action="#" method="post" onsubmit="event.preventDefault(); location.href='staff-dashboard.html';">
+                <label for="staff-username">E-mail or Username:</label>
+                <input id="staff-username" name="username" type="text" placeholder="juanmapagmahal143">
+
+                <label for="staff-password">Password:</label>
+                <input id="staff-password" name="password" type="password" placeholder="************">
+
+                <button class="auth-btn" type="submit">Log In</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Residents' Maintenance | Barangay 86ers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="profile-card">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='none'%3E%3Crect width='200' height='200' rx='100' fill='%23cddffe'/%3E%3Cpath d='M100 108c-19.9 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.1 36-36 36zm0 18c-24 0-72 12.1-72 36v9c0 5 4 9 9 9h126c5 0 9-4 9-9v-9c0-23.9-48-36-72-36z' fill='%238aa8d8'/%3E%3C/svg%3E" alt="" aria-hidden="true" loading="lazy">
+                <h2>Juan Dela Cruz</h2>
+                <p>Barangay Health Worker</p>
+                <a class="profile-link" href="bhw-profile.html">View Profile</a>
+            </div>
+            <nav class="sidebar-nav" aria-label="Primary">
+                <a href="bhw-dashboard.html" class="nav-item">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">Dashboard</span>
+                </a>
+                <a href="medicine-inventory.html" class="nav-item">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 4h4a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" />
+                            <path d="M7 12h8" />
+                            <path d="M15 6h2a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-2" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">Medicine Inventory</span>
+                </a>
+                <a href="residents-maintenance.html" class="nav-item is-active">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="6" r="3" />
+                            <path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                            <rect x="3" y="10" width="5" height="7" rx="1.2" />
+                            <path d="M5.5 11.5v4" />
+                            <path d="M4 13.5h3" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">Residents' Maintenance</span>
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 20v-6" />
+                            <path d="M12 20V8" />
+                            <path d="M18 20v-10" />
+                            <path d="M4 20h16" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">Reports</span>
+                </a>
+                <a href="about.html" class="nav-item">
+                    <span class="nav-item__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 8v5" />
+                            <path d="M12 16h0" />
+                        </svg>
+                    </span>
+                    <span class="nav-item__label">About</span>
+                </a>
+            </nav>
+            <button class="logout-btn" onclick="location.href='index.html'">
+                <span class="logout-btn__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2v-2" />
+                        <path d="M14 12H3" />
+                        <path d="M6 9l-3 3 3 3" />
+                    </svg>
+                </span>
+                <span>Logout</span>
+            </button>
+        </aside>
+
+        <main class="maintenance-content">
+            <header class="maintenance-header">
+                <img src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
+                <div>
+                    <h1>Barangay Health and Demographic Record Management System</h1>
+                </div>
+                <button class="user-pill" aria-label="User menu">
+                    <span>JD</span>
+                </button>
+            </header>
+
+            <section class="maintenance-section" aria-labelledby="track-title">
+                <div class="maintenance-title-row">
+                    <h2 id="track-title">Residents' Maintenance Track</h2>
+                </div>
+                <div class="inventory-controls">
+                    <div class="inventory-search">
+                        <svg class="inventory-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7" />
+                            <path d="M16.5 16.5L21 21" />
+                        </svg>
+                        <input type="search" placeholder="Search by name or Health ID" aria-label="Search residents maintenance">
+                        <button class="search-submit" type="button" aria-label="Start search">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14" />
+                                <path d="M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                    <button class="add-med-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 5v14" />
+                            <path d="M5 12h14" />
+                        </svg>
+                        <span>Add Record</span>
+                    </button>
+                </div>
+                <div class="inventory-table-card">
+                    <div class="table-scroll">
+                        <table class="inventory-table" aria-label="Residents maintenance table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Health ID</th>
+                                    <th scope="col">Indication</th>
+                                    <th scope="col">Medicine Name</th>
+                                    <th scope="col">Qty.</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>12/31/25</td>
+                                    <td>Princess Kathrine Tiocao</td>
+                                    <td>B86PK1B25</td>
+                                    <td>Allergy</td>
+                                    <td>Ceterizine (Antihistamine)</td>
+                                    <td>15</td>
+                                    <td>
+                                        <div class="inventory-row-actions">
+                                            <button class="inventory-action-btn" type="button">Edit</button>
+                                            <button class="inventory-action-btn inventory-action-btn--danger" type="button">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>08/08/25</td>
+                                    <td>Alessandra Kamantigue</td>
+                                    <td>B86AK0824</td>
+                                    <td>Asthma</td>
+                                    <td>Asmacare (Salbutamol)</td>
+                                    <td>1</td>
+                                    <td>
+                                        <div class="inventory-row-actions">
+                                            <button class="inventory-action-btn" type="button">Edit</button>
+                                            <button class="inventory-action-btn inventory-action-btn--danger" type="button">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="maintenance-section" aria-labelledby="meds-title">
+                <div class="maintenance-title-row">
+                    <h2 id="meds-title">Residents' Medications Needs</h2>
+                </div>
+                <div class="meds-panel">
+                    <ul class="meds-list">
+                        <li>
+                            <span class="meds-label">Losartan</span>
+                            <div class="meds-progress">
+                                <div class="meds-progress__fill" style="--value: 85%;"></div>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="meds-label">Metformin</span>
+                            <div class="meds-progress">
+                                <div class="meds-progress__fill" style="--value: 55%;"></div>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="meds-label">Rosuvastatin</span>
+                            <div class="meds-progress">
+                                <div class="meds-progress__fill" style="--value: 25%;"></div>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="meds-label">Paracetamol</span>
+                            <div class="meds-progress">
+                                <div class="meds-progress__fill" style="--value: 70%;"></div>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="meds-label">Insulin</span>
+                            <div class="meds-progress">
+                                <div class="meds-progress__fill" style="--value: 45%;"></div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

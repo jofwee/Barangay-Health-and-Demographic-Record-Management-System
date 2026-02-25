@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Inquiry | Barangay 86ers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="inquiry-body">
+    <main class="inquiry" role="region" aria-label="Account Inquiry">
+        <h1>Account Inquiry:</h1>
+        <section class="inquiry-card">
+            <img class="inquiry-card__badge" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
+            <div class="concern">
+                <p class="concern__label">Concern:</p>
+                <div class="concern__actions" role="group" aria-label="Inquiry type">
+                    <button type="button" class="pill pill--active" data-target="creation">Request Account Creation</button>
+                    <button type="button" class="pill" data-target="retrieval">Request Account Retrieval</button>
+                </div>
+            </div>
+            <hr class="divider" aria-hidden="true">
+            <form class="inquiry-form is-active" data-form="creation">
+                <div class="field">
+                    <label for="first-name">First Name:</label>
+                    <input id="first-name" name="first-name" type="text" placeholder="Juan">
+                </div>
+                <div class="field">
+                    <label for="suffix">Suffix (if any):</label>
+                    <input id="suffix" name="suffix" type="text" placeholder="Sr. / Jr.">
+                </div>
+                <div class="field">
+                    <label for="last-name">Last Name:</label>
+                    <input id="last-name" name="last-name" type="text" placeholder="Dela Cruz">
+                </div>
+                <div class="field">
+                    <label for="sex">Sex:</label>
+                    <select id="sex" name="sex">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="prefer-not">Prefer not to say</option>
+                    </select>
+                </div>
+                <div class="field field--full">
+                    <label for="email">E-mail address:</label>
+                    <input id="email" name="email" type="email" placeholder="juandelacruz@yahoo.com">
+                </div>
+                <div class="form-actions">
+                    <button class="submit-btn" type="submit">Send Request</button>
+                </div>
+            </form>
+            <form class="inquiry-form" data-form="retrieval">
+                <div class="field">
+                    <label for="registered-email">Registered E-mail address:</label>
+                    <input id="registered-email" name="registered-email" type="email" placeholder="juandelacruz@yahoo.com">
+                </div>
+                <div class="field">
+                    <label for="role">Role:</label>
+                    <select id="role" name="role">
+                        <option value="staff">Staff</option>
+                        <option value="bhw">BHW</option>
+                    </select>
+                </div>
+                <div class="field field--full">
+                    <label for="registered-name">Registered Full Name:</label>
+                    <input id="registered-name" name="registered-name" type="text" placeholder="Juan Dela Cruz">
+                </div>
+                <div class="form-actions">
+                    <button class="submit-btn" type="submit">Send Request</button>
+                </div>
+            </form>
+        </section>
+        <section class="modal" data-modal hidden>
+            <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                <h2 id="modal-title">Request Sent!</h2>
+                <p>Please wait for a confirmation email for your account details. Keep the provided username and password confidential.</p>
+                <button type="button" class="modal__close">Confirm</button>
+            </div>
+        </section>
+    </main>
+    <script>
+        const pillButtons = document.querySelectorAll('[data-target]');
+        const forms = document.querySelectorAll('[data-form]');
+        const modal = document.querySelector('[data-modal]');
+        const modalClose = modal.querySelector('.modal__close');
+
+        pillButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                pillButtons.forEach(btn => btn.classList.toggle('pill--active', btn === button));
+                const target = button.dataset.target;
+                forms.forEach(form => form.classList.toggle('is-active', form.dataset.form === target));
+            });
+        });
+
+        forms.forEach(form => {
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                modal.removeAttribute('hidden');
+            });
+        });
+
+        modalClose.addEventListener('click', () => {
+            modal.setAttribute('hidden', '');
+        });
+
+        modal.addEventListener('click', event => {
+            if (event.target === modal) {
+                modal.setAttribute('hidden', '');
+            }
+        });
+    </script>
+</body>
+</html>
