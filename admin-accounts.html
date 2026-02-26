@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Account Requests | Barangay 86ers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-body">
+    <!-- Login gate (shown if not signed in as admin) -->
+    <main id="loginGate" class="auth" role="region" aria-label="Admin Login">
+        <section class="auth-card">
+            <img class="auth-card__logo" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
+            <h1>Admin Login</h1>
+            <form id="adminLoginForm" class="auth-form">
+                <label for="admin-email">E-mail:</label>
+                <input id="admin-email" type="email" placeholder="admin@barangay86.com" required>
+
+                <label for="admin-password">Password:</label>
+                <input id="admin-password" type="password" placeholder="************" required>
+
+                <button class="auth-btn" type="submit" id="loginBtn">Log In</button>
+            </form>
+            <div id="loginError" class="auth-message auth-message--error" style="display:none;"></div>
+        </section>
+    </main>
+
+    <!-- Admin panel (shown after successful admin login) -->
+    <main id="adminPanel" class="admin-panel" style="display:none;" role="region" aria-label="Account Requests Management">
+        <header class="admin-header">
+            <div>
+                <h1>Account Requests</h1>
+                <p class="admin-header__sub">Review, approve, and assign roles to account requests.</p>
+            </div>
+            <div class="admin-header__actions">
+                <span id="adminEmail" class="admin-email"></span>
+                <button class="btn btn--sm" onclick="handleLogout()">Log Out</button>
+            </div>
+        </header>
+
+        <!-- Filter tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab is-active" data-filter="pending">Pending</button>
+            <button class="admin-tab" data-filter="approved">Approved</button>
+            <button class="admin-tab" data-filter="rejected">Rejected</button>
+            <button class="admin-tab" data-filter="all">All</button>
+        </div>
+
+        <!-- Requests list -->
+        <div id="requestsList" class="requests-list">
+            <p class="loading-text">Loading requests...</p>
+        </div>
+    </main>
+
+    <!-- Approval modal -->
+    <div id="approveModal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <h2>Approve Account Request</h2>
+            <div id="modalDetails" class="modal-details"></div>
+            <label class="modal-label" for="roleSelect">Assign Role:</label>
+            <select id="roleSelect" class="modal-select">
+                <option value="">-- Select Role --</option>
+                <option value="staff">Staff</option>
+                <option value="bhw">BHW (Barangay Health Worker)</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn btn--approve" id="confirmApproveBtn">Approve</button>
+                <button class="btn btn--cancel" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        // ── DOM refs ──────────────────────────────────────
+        const loginGate = document.getElementById('loginGate');
+        const adminPanel = document.getElementById('adminPanel');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        const loginError = document.getElementById('loginError');
+        const adminEmailSpan = document.getElementById('adminEmail');
+        const requestsList = document.getElementById('requestsList');
+        const approveModal = document.getElementById('approveModal');
+        const modalDetails = document.getElementById('modalDetails');
+        const roleSelect = document.getElementById('roleSelect');
+        const confirmApproveBtn = document.getElementById('confirmApproveBtn');
+
+        let currentFilter = 'pending';
+        let pendingApprovalId = null;
+
+        // ── Auth state listener ───────────────────────────
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // Check if user has admin role
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists && userDoc.data().role === 'admin') {
+                    loginGate.style.display = 'none';
+                    adminPanel.style.display = 'block';
+                    adminEmailSpan.textContent = user.email;
+                    loadRequests();
+                } else {
+                    showLoginError('Access denied. You are not an administrator.');
+                    auth.signOut();
+                }
+            } else {
+                loginGate.style.display = '';
+                adminPanel.style.display = 'none';
+            }
+        });
+
+        // ── Admin login ───────────────────────────────────
+        adminLoginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.style.display = 'none';
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (err) {
+                showLoginError(friendlyError(err.code));
+            }
+        });
+
+        function showLoginError(msg) {
+            loginError.textContent = msg;
+            loginError.style.display = 'block';
+        }
+
+        function handleLogout() {
+            auth.signOut();
+        }
+
+        // ── Load requests from Firestore ──────────────────
+        async function loadRequests() {
+            requestsList.innerHTML = '<p class="loading-text">Loading...</p>';
+            try {
+                let query = db.collection('accountRequests').orderBy('createdAt', 'desc');
+                if (currentFilter !== 'all') {
+                    query = query.where('status', '==', currentFilter);
+                }
+                const snap = await query.get();
+
+                if (snap.empty) {
+                    requestsList.innerHTML = '<p class="loading-text">No requests found.</p>';
+                    return;
+                }
+
+                requestsList.innerHTML = '';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'request-card request-card--' + d.status;
+                    card.innerHTML = `
+                        <div class="request-card__info">
+                            <h3>${escHtml(d.fullName)}</h3>
+                            <p><strong>Email:</strong> ${escHtml(d.email)}</p>
+                            <p><strong>Contact:</strong> ${escHtml(d.contactNumber || '—')}</p>
+                            <p><strong>Reason:</strong> ${escHtml(d.reason || '—')}</p>
+                            <p class="request-card__date">${formatDate(d.createdAt)}</p>
+                        </div>
+                        <div class="request-card__status">
+                            <span class="status-badge status-badge--${d.status}">${d.status.toUpperCase()}</span>
+                            ${d.assignedRole ? `<span class="role-badge">${d.assignedRole.toUpperCase()}</span>` : ''}
+                        </div>
+                        <div class="request-card__actions">
+                            ${d.status === 'pending' ? `
+                                <button class="btn btn--approve btn--sm" onclick="openApproveModal('${doc.id}', '${escAttr(d.fullName)}', '${escAttr(d.email)}')">Approve</button>
+                                <button class="btn btn--reject btn--sm" onclick="rejectRequest('${doc.id}')">Reject</button>
+                            ` : ''}
+                        </div>
+                    `;
+                    requestsList.appendChild(card);
+                });
+            } catch (err) {
+                requestsList.innerHTML = `<p class="loading-text" style="color:#c0392b;">Error: ${err.message}</p>`;
+            }
+        }
+
+        // ── Tab filtering ─────────────────────────────────
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelector('.admin-tab.is-active').classList.remove('is-active');
+                tab.classList.add('is-active');
+                currentFilter = tab.dataset.filter;
+                loadRequests();
+            });
+        });
+
+        // ── Approve modal ─────────────────────────────────
+        function openApproveModal(docId, name, email) {
+            pendingApprovalId = docId;
+            modalDetails.innerHTML = `<p><strong>${escHtml(name)}</strong> (${escHtml(email)})</p>`;
+            roleSelect.value = '';
+            approveModal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            approveModal.style.display = 'none';
+            pendingApprovalId = null;
+        }
+
+        confirmApproveBtn.addEventListener('click', async () => {
+            const role = roleSelect.value;
+            if (!role) {
+                alert('Please select a role before approving.');
+                return;
+            }
+            confirmApproveBtn.disabled = true;
+            confirmApproveBtn.textContent = 'Approving...';
+
+            try {
+                await db.collection('accountRequests').doc(pendingApprovalId).update({
+                    status: 'approved',
+                    assignedRole: role,
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reviewedBy: auth.currentUser.email
+                });
+                closeModal();
+                loadRequests();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                confirmApproveBtn.disabled = false;
+                confirmApproveBtn.textContent = 'Approve';
+            }
+        });
+
+        // ── Reject ────────────────────────────────────────
+        async function rejectRequest(docId) {
+            if (!confirm('Reject this account request?')) return;
+            try {
+                await db.collection('accountRequests').doc(docId).update({
+                    status: 'rejected',
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reviewedBy: auth.currentUser.email
+                });
+                loadRequests();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // ── Helpers ───────────────────────────────────────
+        function escHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        function escAttr(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        function formatDate(ts) {
+            if (!ts) return '';
+            const d = ts.toDate();
+            return d.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function friendlyError(code) {
+            const map = {
+                'auth/user-not-found': 'No account found with that email.',
+                'auth/wrong-password': 'Incorrect password.',
+                'auth/invalid-email': 'Invalid email format.',
+                'auth/too-many-requests': 'Too many failed attempts. Try again later.',
+                'auth/invalid-credential': 'Invalid email or password.'
+            };
+            return map[code] || 'Login failed. Please try again.';
+        }
+    </script>
+</body>
+</html>

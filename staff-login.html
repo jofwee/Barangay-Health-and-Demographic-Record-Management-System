@@ -14,16 +14,89 @@
         <section class="auth-card">
             <img class="auth-card__logo" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
             <h1>Sign In as Staff</h1>
-            <form class="auth-form" action="#" method="post" onsubmit="event.preventDefault(); location.href='staff-dashboard.html';">
-                <label for="staff-username">E-mail or Username:</label>
-                <input id="staff-username" name="username" type="text" placeholder="juanmapagmahal143">
+            <form id="staffLoginForm" class="auth-form">
+                <label for="staff-email">E-mail:</label>
+                <input id="staff-email" name="email" type="email" placeholder="juan@email.com" required>
 
                 <label for="staff-password">Password:</label>
-                <input id="staff-password" name="password" type="password" placeholder="************">
+                <input id="staff-password" name="password" type="password" placeholder="************" required>
 
-                <button class="auth-btn" type="submit">Log In</button>
+                <button class="auth-btn" type="submit" id="loginBtn">Log In</button>
             </form>
+            <div id="errorMsg" class="auth-message auth-message--error" style="display:none;"></div>
+            <p class="auth-footer">
+                No account yet? <a href="request-account.html">Request Account</a>
+            </p>
         </section>
     </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const form = document.getElementById('staffLoginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // If already signed in as staff, redirect
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const doc = await db.collection('users').doc(user.uid).get();
+                if (doc.exists && (doc.data().role === 'staff' || doc.data().role === 'admin')) {
+                    window.location.href = 'staff-dashboard.html';
+                }
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+            errorMsg.style.display = 'none';
+
+            const email = form.email.value.trim();
+            const password = form.password.value;
+
+            try {
+                const cred = await auth.signInWithEmailAndPassword(email, password);
+
+                // Check role
+                const userDoc = await db.collection('users').doc(cred.user.uid).get();
+                if (!userDoc.exists) throw { code: 'no-profile' };
+
+                const role = userDoc.data().role;
+                if (role === 'staff' || role === 'admin') {
+                    window.location.href = 'staff-dashboard.html';
+                } else {
+                    await auth.signOut();
+                    showError('This account is not registered as Staff. Please use the BHW login.');
+                }
+            } catch (err) {
+                showError(friendlyError(err.code || err));
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Log In';
+            }
+        });
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+        }
+
+        function friendlyError(code) {
+            const map = {
+                'auth/user-not-found': 'No account found with that email.',
+                'auth/wrong-password': 'Incorrect password.',
+                'auth/invalid-email': 'Invalid email format.',
+                'auth/invalid-credential': 'Invalid email or password.',
+                'auth/too-many-requests': 'Too many failed attempts. Try again later.',
+                'no-profile': 'Account found but no profile exists. Contact admin.'
+            };
+            return map[code] || 'Login failed. Please try again.';
+        }
+    </script>
 </body>
 </html>

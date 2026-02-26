@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Registration | Barangay 86ers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-body">
+    <main class="auth" role="region" aria-label="Complete Registration">
+        <section class="auth-card">
+            <img class="auth-card__logo" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
+            <h1>Complete Registration</h1>
+            <p class="auth-subtitle">Enter the email you used in your account request and set your password.</p>
+
+            <form id="registerForm" class="auth-form" autocomplete="off">
+                <label for="reg-email">Approved E-mail Address:</label>
+                <input id="reg-email" name="email" type="email" placeholder="juan@email.com" required>
+
+                <label for="reg-password">Set Password:</label>
+                <input id="reg-password" name="password" type="password" placeholder="Minimum 6 characters" minlength="6" required>
+
+                <label for="reg-confirm">Confirm Password:</label>
+                <input id="reg-confirm" name="confirmPassword" type="password" placeholder="Re-enter your password" minlength="6" required>
+
+                <button class="auth-btn" type="submit" id="registerBtn">Create Account</button>
+            </form>
+
+            <div id="successMsg" class="auth-message auth-message--success" style="display:none;">
+                <strong>Account created!</strong><br>
+                You can now <a href="index.html">sign in</a> using your email and password.
+            </div>
+
+            <div id="errorMsg" class="auth-message auth-message--error" style="display:none;"></div>
+
+            <p class="auth-footer">
+                Haven't requested yet? <a href="request-account.html">Request Account</a><br>
+                Already registered? <a href="index.html">Sign In</a>
+            </p>
+        </section>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const registerBtn = document.getElementById('registerBtn');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Creating account...';
+            errorMsg.style.display = 'none';
+
+            const email = form.email.value.trim().toLowerCase();
+            const password = form.password.value;
+            const confirmPassword = form.confirmPassword.value;
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match.');
+                return;
+            }
+
+            try {
+                // 1. Check if this email has an approved request
+                const snap = await db.collection('accountRequests')
+                    .where('email', '==', email)
+                    .where('status', '==', 'approved')
+                    .limit(1)
+                    .get();
+
+                if (snap.empty) {
+                    throw new Error('No approved account request found for this email. Please request an account first or wait for admin approval.');
+                }
+
+                const requestDoc = snap.docs[0];
+                const requestData = requestDoc.data();
+
+                // 2. Create the Firebase Auth account
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+
+                // 3. Update display name
+                await cred.user.updateProfile({
+                    displayName: requestData.fullName
+                });
+
+                // 4. Store user data with assigned role in Firestore
+                await db.collection('users').doc(cred.user.uid).set({
+                    email: email,
+                    fullName: requestData.fullName,
+                    contactNumber: requestData.contactNumber || '',
+                    role: requestData.assignedRole,   // 'staff' or 'bhw'
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 5. Mark the account request as completed
+                await requestDoc.ref.update({
+                    status: 'registered',
+                    registeredAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 6. Sign out (user should log in through the proper login page)
+                await auth.signOut();
+
+                form.style.display = 'none';
+                successMsg.style.display = 'block';
+
+            } catch (err) {
+                showError(friendlyError(err));
+            }
+        });
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+            registerBtn.disabled = false;
+            registerBtn.textContent = 'Create Account';
+        }
+
+        function friendlyError(err) {
+            if (err.code) {
+                const map = {
+                    'auth/email-already-in-use': 'An account with this email already exists. Try signing in instead.',
+                    'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
+                    'auth/invalid-email': 'Invalid email format.'
+                };
+                return map[err.code] || err.message;
+            }
+            return err.message;
+        }
+    </script>
+</body>
+</html>

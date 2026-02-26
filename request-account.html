@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Account | Barangay 86ers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-body">
+    <main class="auth" role="region" aria-label="Request Account">
+        <section class="auth-card">
+            <img class="auth-card__logo" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
+            <h1>Request an Account</h1>
+            <p class="auth-subtitle">Fill out the form below. An administrator will review your request and assign your role.</p>
+
+            <form id="requestForm" class="auth-form" autocomplete="off">
+                <label for="req-name">Full Name:</label>
+                <input id="req-name" name="fullName" type="text" placeholder="Juan Dela Cruz" required>
+
+                <label for="req-email">E-mail Address:</label>
+                <input id="req-email" name="email" type="email" placeholder="juan@email.com" required>
+
+                <label for="req-contact">Contact Number:</label>
+                <input id="req-contact" name="contactNumber" type="tel" placeholder="09171234567" required>
+
+                <label for="req-reason">Reason / Position:</label>
+                <textarea id="req-reason" name="reason" class="auth-textarea" rows="3" placeholder="e.g. Newly hired BHW for Purok 5" required></textarea>
+
+                <button class="auth-btn" type="submit" id="submitBtn">Submit Request</button>
+            </form>
+
+            <div id="successMsg" class="auth-message auth-message--success" style="display:none;">
+                <strong>Request submitted!</strong><br>
+                Please wait for an administrator to approve your account. You will be able to register once approved.
+            </div>
+
+            <div id="errorMsg" class="auth-message auth-message--error" style="display:none;"></div>
+
+            <p class="auth-footer">
+                Already have an account? <a href="index.html">Sign In</a><br>
+                Already approved? <a href="register.html">Complete Registration</a>
+            </p>
+        </section>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const form = document.getElementById('requestForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            errorMsg.style.display = 'none';
+
+            const fullName = form.fullName.value.trim();
+            const email = form.email.value.trim().toLowerCase();
+            const contactNumber = form.contactNumber.value.trim();
+            const reason = form.reason.value.trim();
+
+            try {
+                // Check if this email already has a pending or approved request
+                const existing = await db.collection('accountRequests')
+                    .where('email', '==', email)
+                    .where('status', 'in', ['pending', 'approved'])
+                    .get();
+
+                if (!existing.empty) {
+                    throw new Error('An account request with this email already exists. Please check your email or contact the admin.');
+                }
+
+                // Save the request to Firestore
+                await db.collection('accountRequests').add({
+                    fullName,
+                    email,
+                    contactNumber,
+                    reason,
+                    status: 'pending',         // pending → approved / rejected
+                    assignedRole: null,         // admin sets this on approval
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                form.style.display = 'none';
+                successMsg.style.display = 'block';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Request';
+            }
+        });
+    </script>
+</body>
+</html>
