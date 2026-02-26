@@ -86,8 +86,8 @@
             </button>
         </aside>
 
-        <main class="reports-content">
-            <header class="reports-header">
+        <main class="dashboard-content">
+            <header class="dashboard-header">
                 <img src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
                 <div>
                     <h1>Barangay Health and Demographic Record Management System</h1>
@@ -97,149 +97,69 @@
                 </button>
             </header>
 
-            <section class="reports-section" aria-labelledby="reports-title">
-                <div class="reports-title-row">
-                    <h2 id="reports-title">Summary Reports</h2>
-                    <button class="export-btn" type="button">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                        Export as PDF
-                    </button>
-                </div>
-
-                <!-- Two side-by-side report tables -->
-                <div class="report-tables">
-                    <!-- Medicine Inventory Status -->
-                    <div class="report-card">
-                        <h3>Medicine Inventory Status</h3>
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Medicine Name</th>
-                                    <th>Qty.</th>
-                                    <th>Availability</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Ceterizine</td>
-                                    <td>10</td>
-                                    <td>Low Stock</td>
-                                </tr>
-                                <tr>
-                                    <td>Salbutamol</td>
-                                    <td>35</td>
-                                    <td>In Stock</td>
-                                </tr>
-                                <tr>
-                                    <td>Losartan</td>
-                                    <td>0</td>
-                                    <td>Out of Stock</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Medicine Distribution Report -->
-                    <div class="report-card">
-                        <h3>Medicine Distribution Report</h3>
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Resident Name</th>
-                                    <th>Medicine Name</th>
-                                    <th>Qty.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>05/15/26</td>
-                                    <td>Scheza Mhae Fernando</td>
-                                    <td>Paracetamol</td>
-                                    <td>15</td>
-                                </tr>
-                                <tr>
-                                    <td>07/24/26</td>
-                                    <td>Gian Carlo Dimaranan</td>
-                                    <td>Insulin</td>
-                                    <td>3</td>
-                                </tr>
-                                <tr>
-                                    <td>10/05/26</td>
-                                    <td>Jeoffrey Delos Reyes</td>
-                                    <td>Antibiotic</td>
-                                    <td>5</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Bar Chart: Medicine Inventory Status -->
-                <div class="report-chart-card">
-                    <h3>Medicine Inventory Status</h3>
-                    <div class="report-bar-chart">
-                        <span class="report-bar-chart__y-label">Medicines Distributed</span>
-                        <div class="report-bar-chart__y">
-                            <span>130</span>
-                            <span>110</span>
-                            <span>90</span>
-                            <span>70</span>
-                            <span>50</span>
-                            <span>30</span>
-                            <span>10</span>
+            <section class="data-panels data-panels--single">
+                <div class="panel panel--full">
+                    <header class="panel__header--flex">
+                        <div>
+                            <h2>Monthly Health Records Distributed</h2>
                         </div>
-                        <div class="report-bar-chart__bars">
+                        <button class="export-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            Export
+                        </button>
+                    </header>
+                    <div class="panel__body">
+                        <div class="report-chart">
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 58%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">January</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 65%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">February</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 72%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">March</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 78%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">April</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 90%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">May</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 52%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">June</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 68%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">July</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 20%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">August</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 15%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">September</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 55%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">October</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 62%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">November</span>
                             </div>
                             <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 70%;"></div>
+                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
                                 <span class="report-bar__label">December</span>
                             </div>
                         </div>
@@ -248,11 +168,12 @@
             </section>
         </main>
     </div>
-    <!-- Firebase SDKs + Auth Guard -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth-guard.js"></script>
+    
+    <script src="reports-logic.js"></script>
 </body>
 </html>

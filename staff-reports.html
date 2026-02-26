@@ -87,123 +87,89 @@
             </button>
         </aside>
 
-        <main class="reports-content">
-            <header class="reports-header">
+        <main class="dashboard-content">
+            <header class="dashboard-header">
                 <img src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
                 <div>
                     <h1>Barangay Health and Demographic Record Management System</h1>
                 </div>
+                <button class="user-pill" aria-label="User menu">
+                    <span>JD</span>
+                </button>
             </header>
 
-            <section class="reports-section" aria-labelledby="reports-title">
-                <div class="reports-title-row">
-                    <h2 id="reports-title">Statistical Reports</h2>
-                    <button class="export-btn" type="button">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                        Export as PDF
-                    </button>
-                </div>
-
-                <div class="stat-grid">
-                    <!-- Age Distribution -->
-                    <div class="stat-card stat-card--age">
-                        <h3>Age Distribution</h3>
-                        <div class="age-chart">
-                            <div class="age-row"><span class="age-label">Under 5</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:85%"></div></div><span class="age-val">192</span></div>
-                            <div class="age-row"><span class="age-label">5 – 9</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:68%"></div></div><span class="age-val">146</span></div>
-                            <div class="age-row"><span class="age-label">10 – 14</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:60%"></div></div><span class="age-val">118</span></div>
-                            <div class="age-row"><span class="age-label">15 – 19</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:55%"></div></div><span class="age-val">110</span></div>
-                            <div class="age-row"><span class="age-label">20 – 24</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:72%"></div></div><span class="age-val">166</span></div>
-                            <div class="age-row"><span class="age-label">25 – 29</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:62%"></div></div><span class="age-val">144</span></div>
-                            <div class="age-row"><span class="age-label">30 – 34</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:50%"></div></div><span class="age-val">233</span></div>
-                            <div class="age-row"><span class="age-label">35 – 39</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:58%"></div></div><span class="age-val">131</span></div>
-                            <div class="age-row"><span class="age-label">40 – 44</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:48%"></div></div><span class="age-val">109</span></div>
-                            <div class="age-row"><span class="age-label">45 – 49</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:44%"></div></div><span class="age-val">101</span></div>
-                            <div class="age-row"><span class="age-label">50 – 54</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:40%"></div></div><span class="age-val">148</span></div>
-                            <div class="age-row"><span class="age-label">55 – 59</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:36%"></div></div><span class="age-val">131</span></div>
-                            <div class="age-row"><span class="age-label">60 – 64</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:52%"></div></div><span class="age-val">218</span></div>
-                            <div class="age-row"><span class="age-label">65 – 69</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:38%"></div></div><span class="age-val">128</span></div>
-                            <div class="age-row"><span class="age-label">70 – 74</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:28%"></div></div><span class="age-val">175</span></div>
-                            <div class="age-row"><span class="age-label">75 – 79</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:22%"></div></div><span class="age-val">102</span></div>
-                            <div class="age-row"><span class="age-label">80 and above</span><div class="age-bar-track"><div class="age-bar-fill" style="--val:18%"></div></div><span class="age-val">110</span></div>
+            <section class="data-panels data-panels--single">
+                <div class="panel panel--full">
+                    <header class="panel__header--flex">
+                        <div>
+                            <h2>Demographic Summary</h2>
                         </div>
-                    </div>
-
-                    <!-- Right column -->
-                    <div class="stat-right">
-                        <!-- Population Statistics -->
-                        <div class="stat-card stat-card--pop">
-                            <h3>Population Statistics</h3>
-                            <p class="stat-sub">as of December 2025</p>
-                            <div class="pop-circles">
-                                <div class="pop-circle pop-circle--all">
-                                    <span class="pop-num">3,104</span>
-                                    <span class="pop-label">All</span>
-                                </div>
-                                <div class="pop-circle pop-circle--male">
-                                    <span class="pop-num">1,672</span>
-                                    <span class="pop-label">Male</span>
-                                </div>
-                                <div class="pop-circle pop-circle--female">
-                                    <span class="pop-num">1,432</span>
-                                    <span class="pop-label">Female</span>
-                                </div>
+                        <button class="export-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            Export
+                        </button>
+                    </header>
+                    <div class="panel__body demog-body">
+                        <div class="demog-layout">
+                            <div class="demog-scale">
+                                <span>300</span>
+                                <span>250</span>
+                                <span>200</span>
+                                <span>150</span>
+                                <span>100</span>
+                                <span>50</span>
+                                <span>0</span>
                             </div>
-                        </div>
-
-                        <!-- Classification Breakdown -->
-                        <div class="stat-card stat-card--class">
-                            <h3>Classification Breakdown</h3>
-                            <div class="class-bars">
+                            <div class="demog-bars">
                                 <div class="class-bar">
-                                    <span class="class-val">64</span>
+                                    <span class="class-val">0</span>
                                     <div class="class-bar__cols">
-                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:25%"></div>
-                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:40%"></div>
+                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
+                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
-                                    <span class="class-label">Infant</span>
+                                    <span class="class-label">Infants</span>
                                 </div>
                                 <div class="class-bar">
-                                    <span class="class-val">271</span>
+                                    <span class="class-val">0</span>
                                     <div class="class-bar__cols">
-                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:45%"></div>
-                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:55%"></div>
+                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
+                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
                                     <span class="class-label">Kids</span>
                                 </div>
                                 <div class="class-bar">
-                                    <span class="class-val">302</span>
+                                    <span class="class-val">0</span>
                                     <div class="class-bar__cols">
-                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:50%"></div>
-                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:55%"></div>
+                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
+                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
                                     <span class="class-label">Teenagers</span>
                                 </div>
                                 <div class="class-bar">
-                                    <span class="class-val">1459</span>
+                                    <span class="class-val">0</span>
                                     <div class="class-bar__cols">
-                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:90%"></div>
-                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:85%"></div>
+                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
+                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
                                     <span class="class-label">Adults</span>
                                 </div>
                                 <div class="class-bar">
-                                    <span class="class-val">821</span>
+                                    <span class="class-val">0</span>
                                     <div class="class-bar__cols">
-                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:65%"></div>
-                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:60%"></div>
+                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
+                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
                                     <span class="class-label">Senior Citizens</span>
                                 </div>
                                 <div class="class-bar">
-                                    <span class="class-val">187</span>
+                                    <span class="class-val">0</span>
                                     <div class="class-bar__cols">
-                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:30%"></div>
-                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:35%"></div>
+                                        <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
+                                        <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
                                     <span class="class-label">PWDs</span>
                                 </div>
@@ -214,11 +180,12 @@
             </section>
         </main>
     </div>
-    <!-- Firebase SDKs + Auth Guard -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth-guard.js"></script>
+    
+    <script src="reports-logic.js"></script>
 </body>
 </html>
