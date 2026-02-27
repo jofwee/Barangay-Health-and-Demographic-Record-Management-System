@@ -14,7 +14,7 @@
         <aside class="sidebar">
             <div class="profile-card">
                 <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='none'%3E%3Crect width='200' height='200' rx='100' fill='%23cddffe'/%3E%3Cpath d='M100 108c-19.9 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.1 36-36 36zm0 18c-24 0-72 12.1-72 36v9c0 5 4 9 9 9h126c5 0 9-4 9-9v-9c0-23.9-48-36-72-36z' fill='%238aa8d8'/%3E%3C/svg%3E" alt="" aria-hidden="true" loading="lazy">
-                <h2>Juan Dela Cruz</h2>
+                <h2></h2>
                 <p>Barangay Staff</p>
                 <a class="profile-link" href="staff-profile.html">View Profile</a>
             </div>
@@ -94,84 +94,107 @@
                     <h1>Barangay Health and Demographic Record Management System</h1>
                 </div>
                 <button class="user-pill" aria-label="User menu">
-                    <span>JD</span>
+                    <span></span>
                 </button>
             </header>
 
-            <section class="data-panels data-panels--single">
-                <div class="panel panel--full">
-                    <header class="panel__header--flex">
-                        <div>
-                            <h2>Demographic Summary</h2>
+            <section class="reports-page">
+                <header class="panel__header--flex" style="margin-bottom: 1.25rem;">
+                    <div>
+                        <h2>Statistical Reports</h2>
+                    </div>
+                    <button class="export-btn" id="exportPdfBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Export as PDF
+                    </button>
+                </header>
+
+                <div class="stat-grid">
+                    <!-- Left: Age Distribution -->
+                    <div class="stat-card stat-card--age">
+                        <h3>Age Distribution</h3>
+                        <div class="age-chart" id="ageChart">
+                            <p style="text-align:center; color:#888;">Loading...</p>
                         </div>
-                        <button class="export-btn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                <polyline points="7 10 12 15 17 10" />
-                                <line x1="12" y1="15" x2="12" y2="3" />
-                            </svg>
-                            Export
-                        </button>
-                    </header>
-                    <div class="panel__body demog-body">
-                        <div class="demog-layout">
-                            <div class="demog-scale">
-                                <span>300</span>
-                                <span>250</span>
-                                <span>200</span>
-                                <span>150</span>
-                                <span>100</span>
-                                <span>50</span>
-                                <span>0</span>
+                    </div>
+
+                    <!-- Right column -->
+                    <div class="stat-right">
+                        <!-- Population Statistics -->
+                        <div class="stat-card">
+                            <h3>Population Statistics</h3>
+                            <p class="stat-sub" id="statDate"></p>
+                            <div class="pop-circles">
+                                <div class="pop-circle pop-circle--all">
+                                    <span class="pop-num" id="popAll">0</span>
+                                    <span class="pop-label">All</span>
+                                </div>
+                                <div class="pop-circle pop-circle--male">
+                                    <span class="pop-num" id="popMale">0</span>
+                                    <span class="pop-label">Male</span>
+                                </div>
+                                <div class="pop-circle pop-circle--female">
+                                    <span class="pop-num" id="popFemale">0</span>
+                                    <span class="pop-label">Female</span>
+                                </div>
                             </div>
-                            <div class="demog-bars">
-                                <div class="class-bar">
+                        </div>
+
+                        <!-- Classification Breakdown -->
+                        <div class="stat-card">
+                            <h3>Classification Breakdown</h3>
+                            <div class="class-bars" id="classBreakdown">
+                                <div class="class-bar" data-class="Infant">
                                     <span class="class-val">0</span>
                                     <div class="class-bar__cols">
                                         <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
                                         <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
-                                    <span class="class-label">Infants</span>
+                                    <span class="class-label">INFANT</span>
                                 </div>
-                                <div class="class-bar">
+                                <div class="class-bar" data-class="Kids">
                                     <span class="class-val">0</span>
                                     <div class="class-bar__cols">
                                         <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
                                         <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
-                                    <span class="class-label">Kids</span>
+                                    <span class="class-label">KIDS</span>
                                 </div>
-                                <div class="class-bar">
+                                <div class="class-bar" data-class="Teenagers">
                                     <span class="class-val">0</span>
                                     <div class="class-bar__cols">
                                         <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
                                         <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
-                                    <span class="class-label">Teenagers</span>
+                                    <span class="class-label">TEENAGERS</span>
                                 </div>
-                                <div class="class-bar">
+                                <div class="class-bar" data-class="Adults">
                                     <span class="class-val">0</span>
                                     <div class="class-bar__cols">
                                         <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
                                         <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
-                                    <span class="class-label">Adults</span>
+                                    <span class="class-label">ADULTS</span>
                                 </div>
-                                <div class="class-bar">
+                                <div class="class-bar" data-class="Senior Citizens">
                                     <span class="class-val">0</span>
                                     <div class="class-bar__cols">
                                         <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
                                         <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
-                                    <span class="class-label">Senior Citizens</span>
+                                    <span class="class-label">SENIOR CITIZENS</span>
                                 </div>
-                                <div class="class-bar">
+                                <div class="class-bar" data-class="PWDs">
                                     <span class="class-val">0</span>
                                     <div class="class-bar__cols">
                                         <div class="class-bar__fill class-bar__fill--blue" style="--val:0%"></div>
                                         <div class="class-bar__fill class-bar__fill--gray" style="--val:0%"></div>
                                     </div>
-                                    <span class="class-label">PWDs</span>
+                                    <span class="class-label">PWDS</span>
                                 </div>
                             </div>
                         </div>

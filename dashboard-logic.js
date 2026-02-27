@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const pieContainer = document.querySelector('.pie');
     const barsContainer = document.querySelector('.bars');
 
+    // ── Show loading state immediately ──────────────────────
+    if (barsContainer) {
+        barsContainer.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Loading health records...</p>';
+    }
+
     // ── 1. Fetch Data ─────────────────────────────────────────
     async function loadDashboardData() {
         try {

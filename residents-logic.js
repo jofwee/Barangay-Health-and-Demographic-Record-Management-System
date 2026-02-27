@@ -99,6 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('Are you sure you want to completely delete this resident?')) {
             try {
                 await db.collection('residents').doc(docId).delete();
+
+                // --- RECORD ACTIVITY LOG ---
+                if (auth.currentUser) {
+                    await db.collection('activityLogs').add({
+                        userEmail: auth.currentUser.email,
+                        action: 'Deleted a resident record',
+                        location: 'Residents\' Management',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
                 loadResidents(); 
             } catch (error) {
                 console.error('Error deleting:', error);
@@ -161,6 +172,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 await db.collection('residents').doc(docId).update(updatedData);
+
+                // --- RECORD ACTIVITY LOG ---
+                if (auth.currentUser) {
+                    await db.collection('activityLogs').add({
+                        userEmail: auth.currentUser.email,
+                        action: `Edited resident: ${updatedData.firstName} ${updatedData.surname}`,
+                        location: 'Residents\' Management',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
                 closeEditModal();
                 loadResidents(); // Refresh the table to show the new changes
             } catch (error) {

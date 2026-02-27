@@ -9,6 +9,55 @@
 (function () {
     const requiredRole = document.body.getAttribute('data-auth-role'); // "staff", "bhw", or null
 
+    // ── Instant UI fill from cache (no flicker) ────────
+    const roleLabels = {
+        staff: 'Barangay Staff',
+        bhw: 'Barangay Health Worker',
+        admin: 'Administrator'
+    };
+
+    function populateUI(fullName, email, role) {
+        const sidebarName = document.querySelector('.profile-card h2');
+        const sidebarRole = document.querySelector('.profile-card p');
+        if (sidebarName) sidebarName.textContent = fullName;
+        if (sidebarRole) sidebarRole.textContent = roleLabels[role] || role;
+
+        const userPill = document.querySelector('.user-pill span');
+        if (userPill) {
+            const initials = fullName
+                .split(' ')
+                .map(w => w[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase();
+            userPill.textContent = initials;
+        }
+
+        const bannerName = document.querySelector('.profile-banner__info h2');
+        const bannerEmail = document.querySelector('.profile-banner__info p');
+        const bannerRole = document.querySelector('.profile-banner__role');
+        const bannerAvatar = document.querySelector('.profile-banner__avatar img');
+        if (bannerName) bannerName.textContent = fullName;
+        if (bannerEmail) bannerEmail.textContent = email;
+        if (bannerRole) bannerRole.textContent = roleLabels[role] || role;
+        if (bannerAvatar) bannerAvatar.alt = fullName;
+    }
+
+    // Pre-fill from sessionStorage so the name & avatar never flicker
+    const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
+    if (cached) {
+        populateUI(cached.fullName, cached.email, cached.role);
+
+        // Restore cached avatar immediately
+        const cachedAvatar = sessionStorage.getItem('authAvatar');
+        if (cachedAvatar) {
+            const sidebarImg = document.querySelector('.profile-card img');
+            const bannerImg = document.querySelector('.profile-banner__avatar img');
+            if (sidebarImg) sidebarImg.src = cachedAvatar;
+            if (bannerImg) bannerImg.src = cachedAvatar;
+        }
+    }
+
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
             // Not logged in — redirect to home
@@ -42,48 +91,29 @@
                 }
             }
 
-            // ── Populate sidebar profile card ──────────────
-            const sidebarName = document.querySelector('.profile-card h2');
-            const sidebarRole = document.querySelector('.profile-card p');
-            if (sidebarName) sidebarName.textContent = fullName;
-            if (sidebarRole) {
-                const roleLabels = {
-                    staff: 'Barangay Staff',
-                    bhw: 'Barangay Health Worker',
-                    admin: 'Administrator'
-                };
-                sidebarRole.textContent = roleLabels[role] || role;
+            // ── Cache & populate UI ────────────────────
+            sessionStorage.setItem('authUser', JSON.stringify({ fullName, email, role }));
+            populateUI(fullName, email, role);
+
+            // ── Load avatar into sidebar & banner (+ cache) ──
+            if (data.photoURL) {
+                const sidebarImg = document.querySelector('.profile-card img');
+                const bannerImg = document.querySelector('.profile-banner__avatar img');
+                if (sidebarImg) sidebarImg.src = data.photoURL;
+                if (bannerImg) bannerImg.src = data.photoURL;
+                sessionStorage.setItem('authAvatar', data.photoURL);
             }
 
-            // ── Populate user pill (initials) ──────────────
-            const userPill = document.querySelector('.user-pill span');
-            if (userPill) {
-                const initials = fullName
-                    .split(' ')
-                    .map(w => w[0])
-                    .join('')
-                    .substring(0, 2)
-                    .toUpperCase();
-                userPill.textContent = initials;
+            // ── Log login activity (once per session) ──
+            if (!sessionStorage.getItem('loginLogged')) {
+                sessionStorage.setItem('loginLogged', '1');
+                db.collection('activityLogs').add({
+                    userEmail: email,
+                    action: 'Logged in',
+                    location: 'Authentication',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(() => {});
             }
-
-            // ── Populate profile banner (profile pages) ────
-            const bannerName = document.querySelector('.profile-banner__info h2');
-            const bannerEmail = document.querySelector('.profile-banner__info p');
-            const bannerRole = document.querySelector('.profile-banner__role');
-            const bannerAvatar = document.querySelector('.profile-banner__avatar img');
-
-            if (bannerName) bannerName.textContent = fullName;
-            if (bannerEmail) bannerEmail.textContent = email;
-            if (bannerRole) {
-                const roleLabels = {
-                    staff: 'Barangay Staff',
-                    bhw: 'Barangay Health Worker',
-                    admin: 'Administrator'
-                };
-                bannerRole.textContent = roleLabels[role] || role;
-            }
-            if (bannerAvatar) bannerAvatar.alt = fullName;
 
         } catch (err) {
             console.error('Auth guard error:', err);
@@ -96,6 +126,8 @@
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
             auth.signOut().then(() => {
+                sessionStorage.removeItem('authUser');
+                sessionStorage.removeItem('authAvatar');
                 window.location.href = 'index.html';
             });
         });

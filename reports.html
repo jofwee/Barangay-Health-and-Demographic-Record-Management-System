@@ -14,7 +14,7 @@
         <aside class="sidebar">
             <div class="profile-card">
                 <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='none'%3E%3Crect width='200' height='200' rx='100' fill='%23cddffe'/%3E%3Cpath d='M100 108c-19.9 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.1 36-36 36zm0 18c-24 0-72 12.1-72 36v9c0 5 4 9 9 9h126c5 0 9-4 9-9v-9c0-23.9-48-36-72-36z' fill='%238aa8d8'/%3E%3C/svg%3E" alt="" aria-hidden="true" loading="lazy">
-                <h2>Juan Dela Cruz</h2>
+                <h2></h2>
                 <p>Barangay Health Worker</p>
                 <a class="profile-link" href="bhw-profile.html">View Profile</a>
             </div>
@@ -93,75 +93,89 @@
                     <h1>Barangay Health and Demographic Record Management System</h1>
                 </div>
                 <button class="user-pill" aria-label="User menu">
-                    <span>JD</span>
+                    <span></span>
                 </button>
             </header>
 
-            <section class="data-panels data-panels--single">
-                <div class="panel panel--full">
-                    <header class="panel__header--flex">
-                        <div>
-                            <h2>Monthly Health Records Distributed</h2>
+            <section class="reports-page">
+                <header class="panel__header--flex" style="margin-bottom: 1.25rem;">
+                    <div>
+                        <h2>Summary Reports</h2>
+                    </div>
+                    <button class="export-btn" id="exportPdfBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Export as PDF
+                    </button>
+                </header>
+
+                <!-- Top row: two tables side by side -->
+                <div class="report-tables">
+                    <!-- Medicine Inventory Status -->
+                    <div class="report-card">
+                        <h3>Medicine Inventory Status</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Medicine Name</th>
+                                    <th>Qty.</th>
+                                    <th>Availability</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invStatusBody">
+                                <tr><td colspan="3" style="text-align:center;color:#888;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Medicine Distribution Report -->
+                    <div class="report-card">
+                        <h3>Medicine Distribution Report</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Resident Name</th>
+                                    <th>Medicine Name</th>
+                                    <th>Qty.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="distReportBody">
+                                <tr><td colspan="4" style="text-align:center;color:#888;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bottom: Monthly bar chart -->
+                <div class="report-chart-card">
+                    <h3>Medicine Distribution Status</h3>
+                    <div class="report-bar-chart">
+                        <div class="report-bar-chart__y">
+                            <span id="yLabel5"></span>
+                            <span id="yLabel4"></span>
+                            <span id="yLabel3"></span>
+                            <span id="yLabel2"></span>
+                            <span id="yLabel1"></span>
+                            <span>0</span>
                         </div>
-                        <button class="export-btn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                <polyline points="7 10 12 15 17 10" />
-                                <line x1="12" y1="15" x2="12" y2="3" />
-                            </svg>
-                            Export
-                        </button>
-                    </header>
-                    <div class="panel__body">
-                        <div class="report-chart">
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">January</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">February</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">March</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">April</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">May</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">June</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">July</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">August</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">September</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">October</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">November</span>
-                            </div>
-                            <div class="report-bar">
-                                <div class="report-bar__fill" style="height: 0%; transition: height 0.5s ease;"></div>
-                                <span class="report-bar__label">December</span>
-                            </div>
+                        <span class="report-bar-chart__y-label">Medicines Distributed</span>
+                        <div class="report-bar-chart__bars">
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">January</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">February</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">March</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">April</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">May</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">June</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">July</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">August</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">September</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">October</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">November</span></div>
+                            <div class="report-bar"><div class="report-bar__fill"></div><span class="report-bar__label">December</span></div>
                         </div>
                     </div>
                 </div>
