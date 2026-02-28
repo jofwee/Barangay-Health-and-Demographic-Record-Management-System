@@ -23,7 +23,9 @@
 
                 <button class="auth-btn" type="submit" id="loginBtn">Log In</button>
             </form>
+            <p class="forgot-link"><a href="#" id="forgotPassLink">Forgot Password?</a></p>
             <div id="errorMsg" class="auth-message auth-message--error" style="display:none;"></div>
+            <div id="successMsg" class="auth-message auth-message--success" style="display:none;"></div>
             <p class="auth-footer">
                 No account yet? <a href="request-account.html">Request Account</a>
             </p>
@@ -97,6 +99,32 @@
             };
             return map[code] || 'Login failed. Please try again.';
         }
+
+        // Forgot Password
+        document.getElementById('forgotPassLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = form.email.value.trim();
+            const successMsgEl = document.getElementById('successMsg');
+            errorMsg.style.display = 'none';
+            successMsgEl.style.display = 'none';
+
+            if (!email) {
+                showError('Please enter your email address first, then click Forgot Password.');
+                return;
+            }
+            try {
+                await auth.sendPasswordResetEmail(email);
+                successMsgEl.innerHTML = '<strong>Reset email sent!</strong> Check your inbox for a password reset link.';
+                successMsgEl.style.display = 'block';
+            } catch (err) {
+                const map = {
+                    'auth/user-not-found': 'No account found with that email.',
+                    'auth/invalid-email': 'Please enter a valid email address.',
+                    'auth/too-many-requests': 'Too many attempts. Please try again later.'
+                };
+                showError(map[err.code] || 'Failed to send reset email. Please try again.');
+            }
+        });
     </script>
 </body>
 </html>

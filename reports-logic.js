@@ -141,8 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let totalFemale = 0;
 
             residents.forEach(r => {
-                if (r.sex === 'Male') totalMale++;
-                else if (r.sex === 'Female') totalFemale++;
+                const sex = (r.sex || '').trim().toLowerCase();
+                if (sex === 'male' || sex === 'm') totalMale++;
+                else if (sex === 'female' || sex === 'f') totalFemale++;
             });
 
             const popAll = document.getElementById('popAll');
@@ -217,8 +218,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let c = r.classification === 'Infants' ? 'Infant' : r.classification;
                 if (classStats[c]) {
                     classStats[c].total++;
-                    if (r.sex === 'Male') classStats[c].male++;
-                    else if (r.sex === 'Female') classStats[c].female++;
+                    const sex = (r.sex || '').trim().toLowerCase();
+                    if (sex === 'male' || sex === 'm') classStats[c].male++;
+                    else if (sex === 'female' || sex === 'f') classStats[c].female++;
                 }
             });
 

@@ -2437,6 +2437,22 @@ h1 {
     border: 1px solid #f5a3a3;
 }
 
+.forgot-link {
+    text-align: right;
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+}
+
+.forgot-link a {
+    color: #2a4c9c;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.forgot-link a:hover {
+    text-decoration: underline;
+}
+
 .auth-footer {
     margin-top: 1.5rem;
     font-size: 0.9rem;
