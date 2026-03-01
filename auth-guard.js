@@ -48,6 +48,12 @@
     if (cached) {
         populateUI(cached.fullName, cached.email, cached.role);
 
+        // Show admin nav item immediately from cache
+        if (cached.role === 'admin') {
+            const adminNav = document.getElementById('adminNavItem');
+            if (adminNav) adminNav.style.display = '';
+        }
+
         // Restore cached avatar immediately
         const cachedAvatar = sessionStorage.getItem('authAvatar');
         if (cachedAvatar) {
@@ -94,6 +100,12 @@
             // ── Cache & populate UI ────────────────────
             sessionStorage.setItem('authUser', JSON.stringify({ fullName, email, role }));
             populateUI(fullName, email, role);
+
+            // ── Show admin-only nav item if admin ──
+            if (role === 'admin') {
+                const adminNav = document.getElementById('adminNavItem');
+                if (adminNav) adminNav.style.display = '';
+            }
 
             // ── Load avatar into sidebar & banner (+ cache) ──
             if (data.photoURL) {
