@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <div class="inventory-row-actions">
                         <button class="inventory-action-btn" onclick="editResident('${resident.id}')">Edit</button>
-                        <button class="inventory-action-btn inventory-action-btn--danger" onclick="deleteResident('${resident.id}')">Delete</button>
+                        <button class="inventory-action-btn inventory-action-btn--danger" onclick="deleteResident('${resident.id}', this)">Delete</button>
                     </div>
                 </td>
             `;
@@ -95,16 +95,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ── 4. Global Actions (Delete / Edit) ─────────────────────
-    window.deleteResident = async function(docId) {
-        if (confirm('Are you sure you want to completely delete this resident?')) {
+    window.deleteResident = async function(docId, btn) {
+        if (confirm('Are you sure you want to completely delete this resident?\n\nThis will also remove any related maintenance logs.')) {
+            if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
             try {
-                await db.collection('residents').doc(docId).delete();
+                const resident = allResidents.find(r => r.id === docId);
+
+                // Collect all refs to delete
+                const refsToDelete = [db.collection('residents').doc(docId)];
+
+                if (resident && resident.healthId) {
+                    const logsSnap = await db.collection('maintenanceLogs')
+                        .where('healthId', '==', resident.healthId).get();
+                    logsSnap.forEach(doc => refsToDelete.push(doc.ref));
+                }
+
+                // Chunk into batches of 499 (Firestore limit is 500 ops per batch)
+                const CHUNK = 499;
+                for (let i = 0; i < refsToDelete.length; i += CHUNK) {
+                    const chunk = refsToDelete.slice(i, i + CHUNK);
+                    const batch = db.batch();
+                    chunk.forEach(ref => batch.delete(ref));
+                    await batch.commit();
+                }
 
                 // --- RECORD ACTIVITY LOG ---
                 if (auth.currentUser) {
                     await db.collection('activityLogs').add({
                         userEmail: auth.currentUser.email,
-                        action: 'Deleted a resident record',
+                        action: `Deleted resident: ${resident ? resident.firstName + ' ' + resident.surname : 'Unknown'}`,
                         location: 'Residents\' Management',
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
@@ -114,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Error deleting:', error);
                 alert('Could not delete resident.');
+                if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
             }
         }
     };
@@ -125,7 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('edit-doc-id').value = resident.id;
         document.getElementById('edit-firstname').value = resident.firstName || '';
+        document.getElementById('edit-middlename').value = resident.middleName || '';
         document.getElementById('edit-surname').value = resident.surname || '';
+        document.getElementById('edit-suffix').value = resident.suffix || '';
         document.getElementById('edit-age').value = resident.age || '';
         
         // Match the exact case in your dropdown or default to 'Male'/'Female'
@@ -134,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sexField.value = resident.sex;
         }
 
+        document.getElementById('edit-address').value = resident.address || '';
         document.getElementById('edit-contact').value = resident.contactNumber || '';
         
         const classification = resident.classification || getClassification(resident.age);
@@ -162,9 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const docId = document.getElementById('edit-doc-id').value;
             const updatedData = {
                 firstName: document.getElementById('edit-firstname').value.trim(),
+                middleName: document.getElementById('edit-middlename').value.trim(),
                 surname: document.getElementById('edit-surname').value.trim(),
+                suffix: document.getElementById('edit-suffix').value.trim(),
                 age: parseInt(document.getElementById('edit-age').value.trim(), 10),
                 sex: document.getElementById('edit-sex').value,
+                address: document.getElementById('edit-address').value.trim(),
                 contactNumber: document.getElementById('edit-contact').value.trim(),
                 classification: document.getElementById('edit-classification').value,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -204,13 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ageNum <= 19) return 'Teenagers';
         if (ageNum <= 59) return 'Adults';
         return 'Senior Citizens';
-    }
-
-    function escapeHTML(str) {
-        if (str === null || str === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
     }
 
     // Run the fetch when the page loads

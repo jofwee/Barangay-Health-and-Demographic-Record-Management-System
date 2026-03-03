@@ -8,9 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="86ERS%20LOGO.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="dashboard-body" data-auth-role="staff">
+<body class="dashboard-body" data-auth-role="admin">
     <div class="dashboard">
         <aside class="sidebar">
             <div class="profile-card">
@@ -20,7 +21,7 @@
                 <a class="profile-link" href="staff-profile.html">View Profile</a>
             </div>
             <nav class="sidebar-nav" aria-label="Primary">
-                <a href="staff-dashboard.html" class="nav-item">
+                <a href="staff-dashboard.html" class="nav-item" title="Dashboard">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -31,7 +32,7 @@
                     </span>
                     <span class="nav-item__label">Dashboard</span>
                 </a>
-                <a href="staff-residents.html" class="nav-item">
+                <a href="staff-residents.html" class="nav-item" title="Residents' Management">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="9" cy="7" r="3" />
@@ -42,7 +43,7 @@
                     </span>
                     <span class="nav-item__label">Residents' Management</span>
                 </a>
-                <a href="staff-rbi.html" class="nav-item">
+                <a href="staff-rbi.html" class="nav-item" title="RBI Form">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -54,7 +55,7 @@
                     </span>
                     <span class="nav-item__label">RBI Form</span>
                 </a>
-                <a href="staff-reports.html" class="nav-item">
+                <a href="staff-reports.html" class="nav-item" title="Reports">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 20v-6" />
@@ -65,7 +66,7 @@
                     </span>
                     <span class="nav-item__label">Reports</span>
                 </a>
-                <a href="staff-about.html" class="nav-item">
+                <a href="staff-about.html" class="nav-item" title="About">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
@@ -276,6 +277,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth-guard.js"></script>
+    <script src="utils.js"></script>
 
     <script>
         // ── DOM refs ──────────────────────────────────────
@@ -300,7 +302,12 @@
             const toast = document.createElement('div');
             toast.className = `admin-toast admin-toast--${type}`;
             const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
-            toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${message}</span>`;
+            const icon = document.createElement('i');
+            icon.className = `fas ${icons[type] || icons.info}`;
+            const span = document.createElement('span');
+            span.textContent = message;
+            toast.appendChild(icon);
+            toast.appendChild(span);
             toastContainer.appendChild(toast);
             requestAnimationFrame(() => toast.classList.add('is-visible'));
             setTimeout(() => {
@@ -486,7 +493,7 @@
                     reviewedBy: auth.currentUser.email
                 });
                 closeModal();
-                showToast('Account approved successfully!', 'success');
+                showToast('Account approved successfully! Please notify the applicant via email or phone.', 'success');
                 loadRequests();
                 loadStats();
             } catch (err) {
@@ -532,7 +539,7 @@
 
                 await db.collection('accountRequests').doc(pendingRejectId).update(updateData);
                 closeRejectModal();
-                showToast('Account request rejected.', 'info');
+                showToast('Account request rejected. Consider notifying the applicant.', 'info');
                 loadRequests();
                 loadStats();
             } catch (err) {
@@ -548,14 +555,11 @@
         rejectModal.addEventListener('click', (e) => { if (e.target === rejectModal) closeRejectModal(); });
 
         // ── Helpers ───────────────────────────────────────
-        function escHtml(str) {
-            const d = document.createElement('div');
-            d.textContent = str || '';
-            return d.innerHTML;
-        }
+        // escHtml provided by utils.js as escHTML
+        const escHtml = escHTML;
 
         function escAttr(str) {
-            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            return (str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '');
         }
 
         function formatDate(ts) {
@@ -563,6 +567,7 @@
             const d = ts.toDate();
             return d.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
+
     </script>
 </body>
 </html>

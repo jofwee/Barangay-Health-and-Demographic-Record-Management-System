@@ -7,7 +7,23 @@
 // ──────────────────────────────────────────────────────────
 
 (function () {
-    const requiredRole = document.body.getAttribute('data-auth-role'); // "staff", "bhw", or null
+    const requiredRole = document.body.getAttribute('data-auth-role'); // "staff", "bhw", "admin", or null
+
+    // ── Hide page until auth is verified (prevents content flash) ──
+    if (requiredRole) {
+        const antiFlash = document.createElement('style');
+        antiFlash.id = 'auth-guard-antiflash';
+        antiFlash.textContent = '.dashboard{opacity:0;pointer-events:none;transition:opacity .2s}';
+        document.head.appendChild(antiFlash);
+    }
+    function revealPage() {
+        const af = document.getElementById('auth-guard-antiflash');
+        if (af) {
+            document.querySelector('.dashboard').style.opacity = '1';
+            document.querySelector('.dashboard').style.pointerEvents = '';
+            setTimeout(() => af.remove(), 300);
+        }
+    }
 
     // ── Instant UI fill from cache (no flicker) ────────
     const roleLabels = {
@@ -84,15 +100,22 @@
             const fullName = data.fullName || user.displayName || 'User';
             const email = data.email || user.email || '';
 
-            // Role check — admin can access staff pages too
+            // Role check — admin can access staff pages AND admin-only pages
             if (requiredRole) {
                 const allowed =
                     role === requiredRole ||
                     (requiredRole === 'staff' && role === 'admin');
 
                 if (!allowed) {
-                    auth.signOut();
-                    window.location.href = 'index.html';
+                    // Redirect to their correct dashboard instead of signing out
+                    if (role === 'bhw') {
+                        window.location.href = 'bhw-dashboard.html';
+                    } else if (role === 'staff') {
+                        window.location.href = 'staff-dashboard.html';
+                    } else {
+                        auth.signOut();
+                        window.location.href = 'index.html';
+                    }
                     return;
                 }
             }
@@ -116,6 +139,9 @@
                 sessionStorage.setItem('authAvatar', data.photoURL);
             }
 
+            // ── Reveal the page now that auth is confirmed ──
+            revealPage();
+
             // ── Log login activity (once per session) ──
             if (!sessionStorage.getItem('loginLogged')) {
                 sessionStorage.setItem('loginLogged', '1');
@@ -131,6 +157,21 @@
             console.error('Auth guard error:', err);
         }
     });
+
+    // ── Wire user-pill button to navigate to profile ──
+    const userPillBtn = document.querySelector('.user-pill');
+    if (userPillBtn) {
+        userPillBtn.style.cursor = 'pointer';
+        userPillBtn.addEventListener('click', () => {
+            const cachedUser = JSON.parse(sessionStorage.getItem('authUser') || '{}');
+            const role = cachedUser.role || '';
+            if (role === 'bhw') {
+                window.location.href = 'bhw-profile.html';
+            } else {
+                window.location.href = 'staff-profile.html';
+            }
+        });
+    }
 
     // ── Logout handler ─────────────────────────────────
     const logoutBtn = document.querySelector('.logout-btn');

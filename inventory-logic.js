@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <div class="inventory-row-actions">
                         <button class="inventory-action-btn" onclick="editMedicine('${med.id}')">Edit</button>
-                        <button class="inventory-action-btn inventory-action-btn--danger" onclick="deleteMedicine('${med.id}')">Delete</button>
+                        <button class="inventory-action-btn inventory-action-btn--danger" onclick="deleteMedicine('${med.id}', this)">Delete</button>
                     </div>
                 </td>
             `;
@@ -141,14 +141,28 @@ document.addEventListener('DOMContentLoaded', () => {
         medicineModal.style.display = 'flex';
     };
 
-    window.deleteMedicine = async function(docId) {
+    window.deleteMedicine = async function(docId, btn) {
         if (confirm('Are you sure you want to delete this medicine from the inventory?')) {
+            if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
             try {
+                const med = allMedicines.find(m => m.id === docId);
                 await db.collection('medicines').doc(docId).delete();
-                loadMedicines(); 
+
+                // --- RECORD ACTIVITY LOG ---
+                if (auth.currentUser) {
+                    await db.collection('activityLogs').add({
+                        userEmail: auth.currentUser.email,
+                        action: `Deleted medicine: ${med ? med.name : 'Unknown'}`,
+                        location: 'Medicine Inventory',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                loadMedicines();
             } catch (error) {
                 console.error('Error deleting:', error);
                 alert('Could not delete medicine.');
+                if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
             }
         }
     };
@@ -202,13 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveBtn.textContent = 'Save Medicine';
             }
         });
-    }
-
-    // ── Helper ────────────────────────────────────────────────
-    function escapeHTML(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
     }
 
     // Run the fetch when the page loads

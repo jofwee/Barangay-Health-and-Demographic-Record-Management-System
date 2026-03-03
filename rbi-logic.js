@@ -32,19 +32,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 3. Generate a Health ID (Format: B86 + Initials + Age + Last 2 digits of current year)
-        // Example: Chloe Samantha = CS. Age = 5. Year = 2026. Result = B86CS526
         const initials = (firstname.charAt(0) + surname.charAt(0)).toUpperCase();
         const yearSuffix = new Date().getFullYear().toString().slice(-2);
-        const healthId = `B86${initials}${age}${yearSuffix}`;
+        let healthId = `B86${initials}${age}${yearSuffix}`;
+
+        // Check for uniqueness and append random suffix until unique
+        try {
+            let isUnique = false;
+            let attempts = 0;
+            while (!isUnique && attempts < 5) {
+                const existing = await db.collection('residents')
+                    .where('healthId', '==', healthId).limit(1).get();
+                if (existing.empty) {
+                    isUnique = true;
+                } else {
+                    const rnd = Math.floor(Math.random() * 900 + 100); // 3-digit random
+                    healthId = `B86${initials}${age}${yearSuffix}${rnd}`;
+                    attempts++;
+                }
+            }
+            if (!isUnique) {
+                alert('Could not generate a unique Health ID after multiple attempts. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+                return;
+            }
+        } catch (e) {
+            console.warn('Could not check Health ID uniqueness:', e);
+        }
 
         // 4. Calculate Classification automatically based on Age
         const ageNum = parseInt(age, 10);
+        const isPwd = document.getElementById('rbi-pwd') && document.getElementById('rbi-pwd').checked;
         let classification = 'Adults';
-        if (ageNum < 5) classification = 'Infant';
-        else if (ageNum <= 12) classification = 'Kids';
-        else if (ageNum <= 19) classification = 'Teenagers';
-        else if (ageNum <= 59) classification = 'Adults';
-        else if (ageNum >= 60) classification = 'Senior Citizens';
+        if (isPwd) {
+            classification = 'PWDs';
+        } else if (ageNum < 5) {
+            classification = 'Infant';
+        } else if (ageNum <= 12) {
+            classification = 'Kids';
+        } else if (ageNum <= 19) {
+            classification = 'Teenagers';
+        } else if (ageNum <= 59) {
+            classification = 'Adults';
+        } else if (ageNum >= 60) {
+            classification = 'Senior Citizens';
+        }
 
         // 5. Save to Firestore
         try {

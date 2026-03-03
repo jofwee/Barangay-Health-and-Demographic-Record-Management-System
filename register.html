@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="86ERS%20LOGO.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="auth-body">
@@ -88,25 +89,31 @@
                 // 2. Create the Firebase Auth account
                 const cred = await auth.createUserWithEmailAndPassword(email, password);
 
-                // 3. Update display name
-                await cred.user.updateProfile({
-                    displayName: requestData.fullName
-                });
+                try {
+                    // 3. Update display name
+                    await cred.user.updateProfile({
+                        displayName: requestData.fullName
+                    });
 
-                // 4. Store user data with assigned role in Firestore
-                await db.collection('users').doc(cred.user.uid).set({
-                    email: email,
-                    fullName: requestData.fullName,
-                    contactNumber: requestData.contactNumber || '',
-                    role: requestData.assignedRole,   // 'staff' or 'bhw'
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                    // 4. Store user data with assigned role in Firestore
+                    await db.collection('users').doc(cred.user.uid).set({
+                        email: email,
+                        fullName: requestData.fullName,
+                        contactNumber: requestData.contactNumber || '',
+                        role: requestData.assignedRole,   // 'staff' or 'bhw'
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
 
-                // 5. Mark the account request as completed
-                await requestDoc.ref.update({
-                    status: 'registered',
-                    registeredAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                    // 5. Mark the account request as completed
+                    await requestDoc.ref.update({
+                        status: 'registered',
+                        registeredAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (firestoreErr) {
+                    // Rollback: delete the Auth user so the email isn't permanently taken
+                    await cred.user.delete().catch(() => {});
+                    throw new Error('Account was created but profile setup failed. Please try again.');
+                }
 
                 // 6. Sign out (user should log in through the proper login page)
                 await auth.signOut();

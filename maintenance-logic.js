@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <div class="inventory-row-actions">
                         <button class="inventory-action-btn" onclick="editLog('${log.id}')">Edit</button>
-                        <button class="inventory-action-btn inventory-action-btn--danger" onclick="deleteLog('${log.id}')">Delete</button>
+                        <button class="inventory-action-btn inventory-action-btn--danger" onclick="deleteLog('${log.id}', this)">Delete</button>
                     </div>
                 </td>
             `;
@@ -120,14 +120,64 @@ document.addEventListener('DOMContentLoaded', () => {
         maintenanceModal.style.display = 'flex';
     };
 
-    window.deleteLog = async function(docId) {
+    // Helper: find medicine doc by name (case-insensitive, cached)
+    let _medicinesCache = null;
+    let _medicinesCacheTime = 0;
+    const CACHE_TTL = 30000; // 30 seconds
+
+    async function findMedicineByName(name) {
+        const now = Date.now();
+        if (!_medicinesCache || (now - _medicinesCacheTime) > CACHE_TTL) {
+            _medicinesCache = await db.collection('medicines').get();
+            _medicinesCacheTime = now;
+        }
+        const lowerName = name.toLowerCase();
+        const match = _medicinesCache.docs.find(d => (d.data().name || '').toLowerCase() === lowerName);
+        return match || null;
+    }
+
+    // Invalidate cache after writes that change medicine data
+    function invalidateMedicinesCache() {
+        _medicinesCache = null;
+        _medicinesCacheTime = 0;
+    }
+
+    window.deleteLog = async function(docId, btn) {
         if (confirm('Are you sure you want to delete this log?')) {
+            if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
             try {
-                await db.collection('maintenanceLogs').doc(docId).delete();
+                const log = allLogs.find(l => l.id === docId);
+                const batch = db.batch();
+
+                // Restore stock to inventory
+                if (log && log.medicineName) {
+                    const medDoc = await findMedicineByName(log.medicineName);
+                    if (medDoc) {
+                        batch.update(db.collection('medicines').doc(medDoc.id), {
+                            quantity: firebase.firestore.FieldValue.increment(log.quantity || 0)
+                        });
+                    }
+                }
+
+                batch.delete(db.collection('maintenanceLogs').doc(docId));
+                await batch.commit();
+                invalidateMedicinesCache();
+
+                // Activity log
+                if (auth.currentUser) {
+                    await db.collection('activityLogs').add({
+                        userEmail: auth.currentUser.email,
+                        action: `Deleted maintenance record${log ? ': ' + log.quantity + 'x ' + log.medicineName + ' for ' + log.residentName : ''}`,
+                        location: 'Residents\' Maintenance',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
                 loadLogs(); 
             } catch (error) {
                 console.error('Error deleting:', error);
                 alert('Could not delete record.');
+                if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
             }
         }
     };
@@ -155,37 +205,88 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                // --- THE INVENTORY BRIDGE: DEDUCT STOCK ---
-                if (!docId) {
-                    const medQuery = await db.collection('medicines')
-                                           .where('name', '==', medNameInput)
-                                           .limit(1)
-                                           .get();
+                if (docId) {
+                    // ── EDIT: Sync inventory (atomic batch) ──────────────────
+                    const oldLog = allLogs.find(l => l.id === docId);
+                    const newMedDoc = await findMedicineByName(medNameInput);
+
+                    if (newMedDoc) {
+                        let available = newMedDoc.data().quantity;
+                        if (oldLog && oldLog.medicineName.toLowerCase() === medNameInput.toLowerCase()) {
+                            available += oldLog.quantity;
+                        }
+                        if (available < qtyInput) {
+                            alert(`Insufficient stock: Only ${available} ${medNameInput} available.`);
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = 'Save Record';
+                            return;
+                        }
+                    }
+
+                    const batch = db.batch();
+
+                    // Restore old medicine stock
+                    if (oldLog && oldLog.medicineName) {
+                        const oldMedDoc = (oldLog.medicineName.toLowerCase() === medNameInput.toLowerCase() && newMedDoc)
+                            ? newMedDoc
+                            : await findMedicineByName(oldLog.medicineName);
+                        if (oldMedDoc) {
+                            batch.update(db.collection('medicines').doc(oldMedDoc.id), {
+                                quantity: firebase.firestore.FieldValue.increment(oldLog.quantity)
+                            });
+                        }
+                    }
+
+                    // Deduct new medicine stock
+                    if (newMedDoc) {
+                        batch.update(db.collection('medicines').doc(newMedDoc.id), {
+                            quantity: firebase.firestore.FieldValue.increment(-qtyInput)
+                        });
+                    }
+
+                    // Update the log document
+                    batch.update(db.collection('maintenanceLogs').doc(docId), logData);
+                    await batch.commit();
+                    invalidateMedicinesCache();
+
+                    // Activity log for edit
+                    if (auth.currentUser) {
+                        await db.collection('activityLogs').add({
+                            userEmail: auth.currentUser.email,
+                            action: `Edited maintenance: ${qtyInput}x ${medNameInput} for ${logData.residentName}`,
+                            location: 'Residents\' Maintenance',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+
+                } else {
+                    // ── NEW: Deduct stock atomically (block if insufficient) ──
+                    const medDoc = await findMedicineByName(medNameInput);
                     
-                    if (!medQuery.empty) {
-                        const medDoc = medQuery.docs[0];
+                    if (medDoc) {
                         const currentQty = medDoc.data().quantity;
                         
                         if (currentQty < qtyInput) {
-                            alert(`Warning: Only ${currentQty} ${medNameInput} left in stock. Proceeding, but inventory will show negative.`);
+                            alert(`Insufficient stock: Only ${currentQty} ${medNameInput} available. Cannot proceed.`);
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = 'Save Record';
+                            return;
                         }
-                        
-                        await db.collection('medicines').doc(medDoc.id).update({
+
+                        const batch = db.batch();
+                        batch.update(db.collection('medicines').doc(medDoc.id), {
                             quantity: firebase.firestore.FieldValue.increment(-qtyInput)
                         });
+                        logData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                        const newLogRef = db.collection('maintenanceLogs').doc();
+                        batch.set(newLogRef, logData);
+                        await batch.commit();
+                        invalidateMedicinesCache();
                     } else {
                         alert(`Note: "${medNameInput}" wasn't found in the Inventory. Log saved, but no stock was deducted.`);
+                        logData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                        await db.collection('maintenanceLogs').add(logData);
                     }
-                }
-                // ------------------------------------------
-
-                if (docId) {
-                    // Update existing log
-                    await db.collection('maintenanceLogs').doc(docId).update(logData);
-                } else {
-                    // Create new log
-                    logData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection('maintenanceLogs').add(logData);
 
                     // --- RECORD ACTIVITY LOG ---
                     if (auth.currentUser) {
@@ -254,13 +355,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             medsNeedsList.appendChild(li);
         });
-    }
-
-    // ── Helper ────────────────────────────────────────────────
-    function escapeHTML(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
     }
 
     // Run the fetch when the page loads

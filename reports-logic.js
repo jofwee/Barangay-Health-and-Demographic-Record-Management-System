@@ -13,12 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'In Stock';
     }
 
-    function escHTML(str) {
-        if (!str) return '';
-        const d = document.createElement('div');
-        d.textContent = str;
-        return d.innerHTML;
-    }
+    // escHTML provided by utils.js
 
     async function loadBhwReports() {
         if (!invStatusBody && !distReportBody && !barChartBars) return;
@@ -77,15 +72,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // ── 3. Monthly bar chart ──────────────────────────
+            // ── 3. Monthly bar chart (current year only) ──
             if (barChartBars) {
+                const currentYear = new Date().getFullYear().toString();
                 const monthlyQty = new Array(12).fill(0);
 
                 logs.forEach(log => {
                     if (log.date) {
-                        const monthIndex = parseInt(log.date.split('-')[1], 10) - 1;
-                        if (monthIndex >= 0 && monthIndex <= 11) {
-                            monthlyQty[monthIndex] += (log.quantity || 1);
+                        const parts = log.date.split('-');
+                        if (parts[0] === currentYear) {
+                            const monthIndex = parseInt(parts[1], 10) - 1;
+                            if (monthIndex >= 0 && monthIndex <= 11) {
+                                monthlyQty[monthIndex] += (log.quantity || 1);
+                            }
                         }
                     }
                 });
@@ -255,6 +254,64 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error loading staff reports:', error);
             if (ageChart) ageChart.innerHTML = '<p style="text-align:center;color:red;">Failed to load reports.</p>';
         }
+    }
+
+    // ── Export PDF ────────────────────────────────────────
+    const exportBtn = document.getElementById('exportPdfBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            const section = document.querySelector('.reports-page');
+            if (!section) return;
+
+            exportBtn.disabled = true;
+            const origText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Generating...';
+
+            try {
+                const canvas = await html2canvas(section, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#f5f6fa',
+                    logging: false
+                });
+
+                const { jsPDF } = window.jspdf;
+                const imgData = canvas.toDataURL('image/png');
+                const imgW = canvas.width;
+                const imgH = canvas.height;
+
+                // Fit to A4 landscape or portrait depending on aspect ratio
+                const isLandscape = imgW > imgH;
+                const pdf = new jsPDF({
+                    orientation: isLandscape ? 'landscape' : 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageW = pdf.internal.pageSize.getWidth();
+                const pageH = pdf.internal.pageSize.getHeight();
+                const margin = 10;
+                const maxW = pageW - margin * 2;
+                const maxH = pageH - margin * 2;
+                const ratio = Math.min(maxW / imgW, maxH / imgH);
+                const w = imgW * ratio;
+                const h = imgH * ratio;
+                const x = (pageW - w) / 2;
+                const y = margin;
+
+                pdf.addImage(imgData, 'PNG', x, y, w, h);
+
+                const dateStr = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+                const pageTitle = ageChart ? 'Staff-Report' : 'BHW-Report';
+                pdf.save(`${pageTitle}_${dateStr}.pdf`);
+            } catch (err) {
+                console.error('PDF export error:', err);
+                alert('Failed to generate PDF. Please try again.');
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = origText;
+            }
+        });
     }
 
     // Initialize

@@ -17,6 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
         loadRecentActivities(user.email);
         prefillEditForm(user);
         loadAvatar(user);
+
+        // Populate Health / User ID
+        const idEl = document.getElementById('profileHealthId');
+        if (idEl) {
+            const shortId = user.uid.substring(0, 8).toUpperCase();
+            const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
+            const role = (cached && cached.role) || 'staff';
+            const prefix = role === 'bhw' ? 'BHW' : 'STF';
+            idEl.textContent = `ID: ${prefix}-${shortId}`;
+        }
     });
 
     // ══════════════════════════════════════════════════════════
@@ -164,7 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Update email if changed
                 if (newEmail !== user.email) {
-                    await user.updateEmail(newEmail);
+                    if (typeof user.verifyBeforeUpdateEmail === 'function') {
+                        await user.verifyBeforeUpdateEmail(newEmail);
+                        alert('A verification email has been sent to your new address. Please verify it to complete the email change.');
+                    } else {
+                        await user.updateEmail(newEmail);
+                    }
                     await db.collection('users').doc(user.uid).update({ email: newEmail });
                 }
 
@@ -291,13 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ══════════════════════════════════════════════════════════
     // Helpers
     // ══════════════════════════════════════════════════════════
-    function escapeHTML(str) {
-        if (!str) return '';
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-
     function showMsg(text, type) {
         if (!editProfileMsg) return;
         editProfileMsg.textContent = text;

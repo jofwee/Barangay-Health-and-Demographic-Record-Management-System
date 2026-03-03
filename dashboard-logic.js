@@ -4,6 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const pieContainer = document.querySelector('.pie');
     const barsContainer = document.querySelector('.bars');
 
+    // ── Dynamic "As of" date ──────────────────────────────
+    const eyebrow = document.getElementById('dashboardEyebrow');
+    if (eyebrow) {
+        const now = new Date();
+        eyebrow.textContent = 'As of ' + now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
     // ── Show loading state immediately ──────────────────────
     if (barsContainer) {
         barsContainer.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Loading health records...</p>';
@@ -29,7 +36,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── 2. Render Pie Chart (Classification) ──────────────────
     function renderPieChart(residents) {
-        if (!pieContainer || residents.length === 0) return;
+        if (!pieContainer) return;
+        if (residents.length === 0) {
+            pieContainer.style.background = '#e9ecef';
+            pieContainer.title = 'No residents registered yet';
+            // Show empty-state text near the pie
+            const parent = pieContainer.closest('.pie-body') || pieContainer.parentElement;
+            if (parent && !parent.querySelector('.pie-empty')) {
+                const msg = document.createElement('p');
+                msg.className = 'pie-empty';
+                msg.style.cssText = 'text-align:center;color:#888;font-size:0.85rem;margin-top:0.5rem;';
+                msg.textContent = 'No residents registered yet.';
+                parent.appendChild(msg);
+            }
+            return;
+        }
 
         // Tally up the classifications
         const counts = {
@@ -117,11 +138,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Generate the new HTML bars
         sortedTrends.forEach(trend => {
+            const safeName = escapeHTML(trend.name);
             const percentage = Math.round((trend.count / maxCount) * 100);
             const barHTML = `
                 <div class="bar">
                     <div class="bar__fill" style="--value: ${percentage}%" title="${trend.count} cases recorded"></div>
-                    <span>${trend.name}</span>
+                    <span>${safeName}</span>
                 </div>
             `;
             barsContainer.innerHTML += barHTML;

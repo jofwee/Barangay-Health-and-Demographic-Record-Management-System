@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="86ERS%20LOGO.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="dashboard-body" data-auth-role="staff">
@@ -19,7 +20,7 @@
                 <a class="profile-link" href="staff-profile.html">View Profile</a>
             </div>
             <nav class="sidebar-nav" aria-label="Primary">
-                <a href="staff-dashboard.html" class="nav-item">
+                <a href="staff-dashboard.html" class="nav-item" title="Dashboard">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -30,7 +31,7 @@
                     </span>
                     <span class="nav-item__label">Dashboard</span>
                 </a>
-                <a href="staff-residents.html" class="nav-item">
+                <a href="staff-residents.html" class="nav-item" title="Residents' Management">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="9" cy="7" r="3" />
@@ -41,7 +42,7 @@
                     </span>
                     <span class="nav-item__label">Residents' Management</span>
                 </a>
-                <a href="staff-rbi.html" class="nav-item is-active">
+                <a href="staff-rbi.html" class="nav-item is-active" title="RBI Form">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -53,7 +54,7 @@
                     </span>
                     <span class="nav-item__label">RBI Form</span>
                 </a>
-                <a href="staff-reports.html" class="nav-item">
+                <a href="staff-reports.html" class="nav-item" title="Reports">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 20v-6" />
@@ -64,7 +65,7 @@
                     </span>
                     <span class="nav-item__label">Reports</span>
                 </a>
-                <a href="staff-about.html" class="nav-item">
+                <a href="staff-about.html" class="nav-item" title="About">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
@@ -109,7 +110,7 @@
                 <h2 class="rbi-title">RBI FORM</h2>
 
                 <div class="rbi-card">
-                    <form class="rbi-form" action="#" method="post">
+                    <form class="rbi-form">
                         <div class="rbi-row">
                             <div class="rbi-field">
                                 <label for="rbi-surname">Surname:</label>
@@ -128,7 +129,7 @@
                             </div>
                             <div class="rbi-field rbi-field--small">
                                 <label for="rbi-age">Age:</label>
-                                <input id="rbi-age" type="number" placeholder="Type...">
+                                <input id="rbi-age" type="number" min="0" max="150" placeholder="Type...">
                             </div>
                         </div>
 
@@ -155,6 +156,11 @@
                         <div class="rbi-field rbi-field--half">
                             <label for="rbi-contact">Contact No.</label>
                             <input id="rbi-contact" type="text" placeholder="Type...">
+                        </div>
+
+                        <div class="rbi-field rbi-field--half" style="display:flex; align-items:center; gap:0.5rem; padding-top:0.5rem;">
+                            <input id="rbi-pwd" type="checkbox" style="width:18px; height:18px; cursor:pointer;">
+                            <label for="rbi-pwd" style="margin:0; cursor:pointer; font-weight:500;">Person with Disability (PWD)</label>
                         </div>
 
                         <div class="rbi-actions">

@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="86ERS%20LOGO.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="dashboard-body" data-auth-role="bhw">
@@ -19,7 +20,7 @@
                 <a class="profile-link" href="bhw-profile.html">View Profile</a>
             </div>
             <nav class="sidebar-nav" aria-label="Primary">
-                <a href="bhw-dashboard.html" class="nav-item">
+                <a href="bhw-dashboard.html" class="nav-item" title="Dashboard">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -30,7 +31,7 @@
                     </span>
                     <span class="nav-item__label">Dashboard</span>
                 </a>
-                <a href="medicine-inventory.html" class="nav-item">
+                <a href="medicine-inventory.html" class="nav-item" title="Medicine Inventory">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M7 4h4a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" />
@@ -40,7 +41,7 @@
                     </span>
                     <span class="nav-item__label">Medicine Inventory</span>
                 </a>
-                <a href="residents-maintenance.html" class="nav-item is-active">
+                <a href="residents-maintenance.html" class="nav-item is-active" title="Residents' Maintenance">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="6" r="3" />
@@ -52,7 +53,7 @@
                     </span>
                     <span class="nav-item__label">Residents' Maintenance</span>
                 </a>
-                <a href="reports.html" class="nav-item">
+                <a href="reports.html" class="nav-item" title="Reports">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 20v-6" />
@@ -63,7 +64,7 @@
                     </span>
                     <span class="nav-item__label">Reports</span>
                 </a>
-                <a href="about.html" class="nav-item">
+                <a href="about.html" class="nav-item" title="About">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="9" />
@@ -198,6 +199,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth-guard.js"></script>
+    <script src="utils.js"></script>
     
     <script src="maintenance-logic.js"></script>
 </body>
