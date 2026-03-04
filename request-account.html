@@ -3,47 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Account | Barangay 86ers</title>
+    <title>Account Inquiry | Barangay 86ers</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="86ERS%20LOGO.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="auth-body">
-    <main class="auth" role="region" aria-label="Request Account">
-        <section class="auth-card">
-            <img class="auth-card__logo" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
-            <h1>Request an Account</h1>
-            <p class="auth-subtitle">Fill out the form below. An administrator will review your request and assign your role.</p>
+<body class="inquiry-body">
+    <main class="inquiry" role="region" aria-label="Account Inquiry">
+        <h1>Account Inquiry:</h1>
 
-            <form id="requestForm" class="auth-form" autocomplete="off">
-                <label for="req-name">Full Name:</label>
-                <input id="req-name" name="fullName" type="text" placeholder="Juan Dela Cruz" required>
+        <section class="inquiry-card">
+            <img class="inquiry-card__badge" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
 
-                <label for="req-email">E-mail Address:</label>
-                <input id="req-email" name="email" type="email" placeholder="juan@email.com" required>
-
-                <label for="req-contact">Contact Number:</label>
-                <input id="req-contact" name="contactNumber" type="tel" placeholder="09171234567" required>
-
-                <label for="req-reason">Reason / Position:</label>
-                <textarea id="req-reason" name="reason" class="auth-textarea" rows="3" placeholder="e.g. Newly hired BHW for Purok 5" required></textarea>
-
-                <button class="auth-btn" type="submit" id="submitBtn">Submit Request</button>
-            </form>
-
-            <div id="successMsg" class="auth-message auth-message--success" style="display:none;">
-                <strong>Request submitted!</strong><br>
-                Please wait for an administrator to approve your account. You will be able to register once approved.
+            <!-- Concern toggle -->
+            <div class="concern">
+                <span class="concern__label">Concern:</span>
+                <div class="concern__actions">
+                    <button class="pill pill--active" data-target="createForm" type="button">Request Account Creation</button>
+                    <button class="pill" data-target="retrieveForm" type="button">Request Account Retrieval</button>
+                </div>
             </div>
 
-            <div id="errorMsg" class="auth-message auth-message--error" style="display:none;"></div>
+            <hr class="divider">
 
-            <p class="auth-footer">
-                Already have an account? <a href="index.html">Sign In</a><br>
-                Already approved? <a href="register.html">Complete Registration</a>
-            </p>
+            <!-- Request Account Creation form -->
+            <form id="createForm" class="inquiry-form is-active" autocomplete="off">
+                <div class="field">
+                    <label for="create-fname">First Name:</label>
+                    <input id="create-fname" name="firstName" type="text" placeholder="Juan" required>
+                </div>
+                <div class="field">
+                    <label for="create-suffix">Suffix (if any):</label>
+                    <input id="create-suffix" name="suffix" type="text" placeholder="Sr. / Jr.">
+                </div>
+                <div class="field">
+                    <label for="create-lname">Last Name:</label>
+                    <input id="create-lname" name="lastName" type="text" placeholder="Dela Cruz" required>
+                </div>
+                <div class="field">
+                    <label for="create-sex">Sex:</label>
+                    <select id="create-sex" name="sex" required>
+                        <option value="Male" selected>Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="field field--full">
+                    <label for="create-email">E-mail address:</label>
+                    <input id="create-email" name="email" type="email" placeholder="juandelacruz@yahoo.com" required>
+                </div>
+                <div class="form-actions">
+                    <button class="submit-btn" type="submit" id="createBtn">Send Request</button>
+                </div>
+            </form>
+
+            <!-- Request Account Retrieval form -->
+            <form id="retrieveForm" class="inquiry-form" autocomplete="off">
+                <div class="field">
+                    <label for="retrieve-email">Registered E-mail address:</label>
+                    <input id="retrieve-email" name="email" type="email" placeholder="juandelacruz@yahoo.com" required>
+                </div>
+                <div class="field">
+                    <label for="retrieve-role">Role:</label>
+                    <select id="retrieve-role" name="role" required>
+                        <option value="Staff" selected>Staff</option>
+                        <option value="BHW">BHW</option>
+                    </select>
+                </div>
+                <div class="field field--full">
+                    <label for="retrieve-name">Registered Full Name:</label>
+                    <input id="retrieve-name" name="fullName" type="text" placeholder="Juan Dela Cruz" required>
+                </div>
+                <div class="form-actions">
+                    <button class="submit-btn" type="submit" id="retrieveBtn">Send Request</button>
+                </div>
+            </form>
+
+            <!-- Success / Error messages -->
+            <div id="successMsg" class="auth-message auth-message--success" style="display:none;">
+                <strong>Request submitted!</strong><br>
+                Please wait for an administrator to review your request.
+            </div>
+            <div id="errorMsg" class="auth-message auth-message--error" style="display:none;"></div>
         </section>
     </main>
 
@@ -54,41 +96,61 @@
     <script src="firebase-config.js"></script>
 
     <script>
-        const form = document.getElementById('requestForm');
-        const submitBtn = document.getElementById('submitBtn');
+        /* ── Tab switching ── */
+        const pills = document.querySelectorAll('.pill');
+        const forms = document.querySelectorAll('.inquiry-form');
+
+        pills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                pills.forEach(p => p.classList.remove('pill--active'));
+                pill.classList.add('pill--active');
+                forms.forEach(f => f.classList.remove('is-active'));
+                document.getElementById(pill.dataset.target).classList.add('is-active');
+                // hide messages on tab switch
+                successMsg.style.display = 'none';
+                errorMsg.style.display = 'none';
+            });
+        });
+
         const successMsg = document.getElementById('successMsg');
         const errorMsg = document.getElementById('errorMsg');
 
-        form.addEventListener('submit', async (e) => {
+        /* ── Account Creation request ── */
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            const btn = document.getElementById('createBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
             errorMsg.style.display = 'none';
 
-            const fullName = form.fullName.value.trim();
+            const form = e.target;
+            const firstName = form.firstName.value.trim();
+            const lastName = form.lastName.value.trim();
+            const suffix = form.suffix.value.trim();
+            const sex = form.sex.value;
             const email = form.email.value.trim().toLowerCase();
-            const contactNumber = form.contactNumber.value.trim();
-            const reason = form.reason.value.trim();
+            const fullName = suffix ? `${firstName} ${lastName} ${suffix}` : `${firstName} ${lastName}`;
 
             try {
-                // Check if this email already has a pending or approved request
                 const existing = await db.collection('accountRequests')
                     .where('email', '==', email)
                     .where('status', 'in', ['pending', 'approved'])
                     .get();
 
                 if (!existing.empty) {
-                    throw new Error('An account request with this email already exists. Please check your email or contact the admin.');
+                    throw new Error('An account request with this email already exists.');
                 }
 
-                // Save the request to Firestore
                 await db.collection('accountRequests').add({
                     fullName,
+                    firstName,
+                    lastName,
+                    suffix,
+                    sex,
                     email,
-                    contactNumber,
-                    reason,
-                    status: 'pending',         // pending → approved / rejected
-                    assignedRole: null,         // admin sets this on approval
+                    type: 'creation',
+                    status: 'pending',
+                    assignedRole: null,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
@@ -97,8 +159,41 @@
             } catch (err) {
                 errorMsg.textContent = err.message;
                 errorMsg.style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Request';
+                btn.disabled = false;
+                btn.textContent = 'Send Request';
+            }
+        });
+
+        /* ── Account Retrieval request ── */
+        document.getElementById('retrieveForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('retrieveBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            errorMsg.style.display = 'none';
+
+            const form = e.target;
+            const email = form.email.value.trim().toLowerCase();
+            const role = form.role.value;
+            const fullName = form.fullName.value.trim();
+
+            try {
+                await db.collection('accountRequests').add({
+                    fullName,
+                    email,
+                    role,
+                    type: 'retrieval',
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                form.style.display = 'none';
+                successMsg.style.display = 'block';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Send Request';
             }
         });
     </script>

@@ -40,11 +40,11 @@ body.dashboard-body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .landing__badge {
-    width: clamp(220px, 40vw, 360px);
+    width: clamp(200px, 35vw, 320px);
     max-width: 100%;
     filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12));
 }
@@ -59,13 +59,17 @@ h1 {
     color: var(--text-muted);
 }
 
+.landing__actions + .landing__actions {
+    margin-top: 0.25rem;
+}
+
 .landing__actions {
     display: flex;
     gap: 1.25rem;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
 }
 
 .btn {
@@ -1807,6 +1811,17 @@ h1 {
     font-family: inherit;
     background: #fbfbfd;
     color: #2c2f36;
+}
+
+.auth-form select {
+    border: 1px solid rgba(28, 52, 108, 0.2);
+    border-radius: 0.9rem;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    background: #fbfbfd;
+    color: #2c2f36;
+    appearance: auto;
 }
 
 .auth-form input::placeholder {

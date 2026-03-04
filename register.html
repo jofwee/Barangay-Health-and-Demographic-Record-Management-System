@@ -27,6 +27,12 @@
                 <label for="reg-confirm">Confirm Password:</label>
                 <input id="reg-confirm" name="confirmPassword" type="password" placeholder="Re-enter your password" minlength="6" required>
 
+                <label for="reg-role">Role:</label>
+                <select id="reg-role" name="role" class="auth-select" required>
+                    <option value="staff">Staff</option>
+                    <option value="bhw">BHW</option>
+                </select>
+
                 <button class="auth-btn" type="submit" id="registerBtn">Create Account</button>
             </form>
 
@@ -38,7 +44,6 @@
             <div id="errorMsg" class="auth-message auth-message--error" style="display:none;"></div>
 
             <p class="auth-footer">
-                Haven't requested yet? <a href="request-account.html">Request Account</a><br>
                 Already registered? <a href="index.html">Sign In</a>
             </p>
         </section>
@@ -95,12 +100,13 @@
                         displayName: requestData.fullName
                     });
 
-                    // 4. Store user data with assigned role in Firestore
+                    // 4. Store user data with role chosen by user in Firestore
+                    const role = form.role.value;
                     await db.collection('users').doc(cred.user.uid).set({
                         email: email,
                         fullName: requestData.fullName,
                         contactNumber: requestData.contactNumber || '',
-                        role: requestData.assignedRole,   // 'staff' or 'bhw'
+                        role: role,   // 'staff' or 'bhw'
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
