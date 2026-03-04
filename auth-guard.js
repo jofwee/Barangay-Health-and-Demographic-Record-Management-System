@@ -78,6 +78,13 @@
             if (sidebarImg) sidebarImg.src = cachedAvatar;
             if (bannerImg) bannerImg.src = cachedAvatar;
         }
+
+        // Reveal immediately from cache if role matches (don't wait for Firebase)
+        if (!requiredRole ||
+            cached.role === requiredRole ||
+            (requiredRole === 'staff' && cached.role === 'admin')) {
+            revealPage();
+        }
     }
 
     auth.onAuthStateChanged(async (user) => {
