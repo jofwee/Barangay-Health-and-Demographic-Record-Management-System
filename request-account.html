@@ -178,16 +178,56 @@
             const fullName = form.fullName.value.trim();
 
             try {
+                // 1. Check for duplicate pending/approved retrieval requests
+                const existing = await db.collection('accountRequests')
+                    .where('email', '==', email)
+                    .where('type', '==', 'retrieval')
+                    .where('status', '==', 'pending')
+                    .get();
+
+                if (!existing.empty) {
+                    throw new Error('A retrieval request for this email is already pending. Please wait for admin review.');
+                }
+
+                // 2. Verify the account exists in the users collection
+                const userSnap = await db.collection('users')
+                    .where('email', '==', email)
+                    .limit(1)
+                    .get();
+
+                if (userSnap.empty) {
+                    throw new Error('No registered account found with this email. If you need a new account, please use "Request Account Creation" instead.');
+                }
+
+                const userData = userSnap.docs[0].data();
+
+                // 3. Verify the role matches
+                const normalizedInputRole = role.toLowerCase();
+                const normalizedUserRole = (userData.role || '').toLowerCase();
+                if (normalizedInputRole !== normalizedUserRole) {
+                    throw new Error('The role you selected does not match the account on file. Please verify and try again.');
+                }
+
+                // 4. Verify the full name matches (case-insensitive)
+                const normalizedInputName = fullName.toLowerCase().replace(/\s+/g, ' ');
+                const normalizedUserName = (userData.fullName || '').toLowerCase().replace(/\s+/g, ' ');
+                if (normalizedInputName !== normalizedUserName) {
+                    throw new Error('The full name does not match the account on file. Please enter your registered full name exactly.');
+                }
+
+                // 5. Save retrieval request with matched user info
                 await db.collection('accountRequests').add({
                     fullName,
                     email,
-                    role,
+                    role: normalizedInputRole,
+                    matchedUserId: userSnap.docs[0].id,
                     type: 'retrieval',
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 form.style.display = 'none';
+                successMsg.innerHTML = '<strong>Retrieval request submitted!</strong><br>An administrator will review your request and send a password reset to your email.';
                 successMsg.style.display = 'block';
             } catch (err) {
                 errorMsg.textContent = err.message;

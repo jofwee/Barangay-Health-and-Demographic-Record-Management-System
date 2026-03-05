@@ -233,6 +233,39 @@
         </div>
     </div>
 
+    <!-- Retrieval approval modal -->
+    <div id="retrieveModal" class="modal-overlay" style="display:none;">
+        <div class="modal admin-modal">
+            <div class="admin-modal__header">
+                <div class="admin-modal__icon admin-modal__icon--retrieve">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div>
+                    <h2>Approve Account Retrieval</h2>
+                    <p class="admin-modal__desc">A password reset email will be sent to the user.</p>
+                </div>
+            </div>
+
+            <div class="admin-modal__divider"></div>
+
+            <div id="retrieveModalDetails" class="admin-modal__details"></div>
+
+            <div class="admin-modal__info-box">
+                <i class="fas fa-info-circle"></i>
+                <span>Approving this request will send a <strong>password reset email</strong> to the user's registered address. They can use the link to set a new password and regain access to their account.</span>
+            </div>
+
+            <div class="admin-modal__actions">
+                <button class="btn btn--cancel" onclick="closeRetrieveModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn--retrieve" id="confirmRetrieveBtn">
+                    <i class="fas fa-paper-plane"></i> Approve & Send Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Reject confirmation modal -->
     <div id="rejectModal" class="modal-overlay" style="display:none;">
         <div class="modal admin-modal">
@@ -284,17 +317,22 @@
         const requestsList = document.getElementById('requestsList');
         const approveModal = document.getElementById('approveModal');
         const rejectModal = document.getElementById('rejectModal');
+        const retrieveModal = document.getElementById('retrieveModal');
         const modalDetails = document.getElementById('modalDetails');
         const rejectModalDetails = document.getElementById('rejectModalDetails');
+        const retrieveModalDetails = document.getElementById('retrieveModalDetails');
         const roleSelect = document.getElementById('roleSelect');
         const confirmApproveBtn = document.getElementById('confirmApproveBtn');
         const confirmRejectBtn = document.getElementById('confirmRejectBtn');
+        const confirmRetrieveBtn = document.getElementById('confirmRetrieveBtn');
         const searchInput = document.getElementById('searchRequests');
         const toastContainer = document.getElementById('toastContainer');
 
         let currentFilter = 'pending';
         let pendingApprovalId = null;
         let pendingRejectId = null;
+        let pendingRetrieveId = null;
+        let pendingRetrieveEmail = null;
         let allRequestsCache = [];
 
         // ── Toast notifications ───────────────────────────
@@ -404,6 +442,10 @@
                         <div class="request-card-v2__header">
                             <h3 class="request-card-v2__name">${escHtml(d.fullName)}</h3>
                             <div class="request-card-v2__badges">
+                                <span class="type-badge type-badge--${d.type || 'creation'}">
+                                    <i class="fas ${d.type === 'retrieval' ? 'fa-key' : 'fa-user-plus'}"></i>
+                                    ${d.type === 'retrieval' ? 'Account Retrieval' : 'Account Creation'}
+                                </span>
                                 <span class="status-badge status-badge--${d.status}">${d.status.toUpperCase()}</span>
                                 ${d.assignedRole ? `<span class="role-badge"><i class="fas fa-id-badge"></i> ${d.assignedRole.toUpperCase()}</span>` : ''}
                             </div>
@@ -420,7 +462,7 @@
                     </div>
                     <div class="request-card-v2__actions">
                         ${d.status === 'pending' ? `
-                            <button class="admin-action-btn admin-action-btn--approve" onclick="openApproveModal('${d.id}', '${escAttr(d.fullName)}', '${escAttr(d.email)}', '${escAttr(d.contactNumber || '')}')">
+                            <button class="admin-action-btn admin-action-btn--approve" onclick="${d.type === 'retrieval' ? `openRetrieveModal('${d.id}', '${escAttr(d.fullName)}', '${escAttr(d.email)}')` : `openApproveModal('${d.id}', '${escAttr(d.fullName)}', '${escAttr(d.email)}', '${escAttr(d.contactNumber || '')}')`}">
                                 <i class="fas fa-check"></i> Approve
                             </button>
                             <button class="admin-action-btn admin-action-btn--reject" onclick="openRejectModal('${d.id}', '${escAttr(d.fullName)}', '${escAttr(d.email)}')">
@@ -553,6 +595,63 @@
         // Close modals on overlay click
         approveModal.addEventListener('click', (e) => { if (e.target === approveModal) closeModal(); });
         rejectModal.addEventListener('click', (e) => { if (e.target === rejectModal) closeRejectModal(); });
+        retrieveModal.addEventListener('click', (e) => { if (e.target === retrieveModal) closeRetrieveModal(); });
+
+        // ── Retrieval approval modal ─────────────────────
+        function openRetrieveModal(docId, name, email) {
+            pendingRetrieveId = docId;
+            pendingRetrieveEmail = email;
+            retrieveModalDetails.innerHTML = `
+                <div class="admin-modal__user-preview">
+                    <div class="admin-modal__user-avatar">${(name || '?').charAt(0).toUpperCase()}</div>
+                    <div>
+                        <strong>${escHtml(name)}</strong>
+                        <p>${escHtml(email)}</p>
+                        <p style="margin-top:0.3rem;"><span class="type-badge type-badge--retrieval"><i class="fas fa-key"></i> Account Retrieval</span></p>
+                    </div>
+                </div>`;
+            retrieveModal.style.display = 'flex';
+        }
+
+        function closeRetrieveModal() {
+            retrieveModal.style.display = 'none';
+            pendingRetrieveId = null;
+            pendingRetrieveEmail = null;
+        }
+
+        confirmRetrieveBtn.addEventListener('click', async () => {
+            confirmRetrieveBtn.disabled = true;
+            confirmRetrieveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending reset...';
+
+            try {
+                // 1. Send password reset email via Firebase Auth
+                await auth.sendPasswordResetEmail(pendingRetrieveEmail);
+
+                // 2. Mark the retrieval request as approved
+                await db.collection('accountRequests').doc(pendingRetrieveId).update({
+                    status: 'approved',
+                    assignedRole: 'retrieval-reset',
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reviewedBy: auth.currentUser.email,
+                    passwordResetSent: true,
+                    passwordResetSentAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                closeRetrieveModal();
+                showToast(`Password reset email sent to ${pendingRetrieveEmail}. The user can now set a new password.`, 'success');
+                loadRequests();
+                loadStats();
+            } catch (err) {
+                let msg = err.message;
+                if (err.code === 'auth/user-not-found') {
+                    msg = 'No Firebase Auth account found for this email. The user may need to register instead.';
+                }
+                showToast('Error: ' + msg, 'error');
+            } finally {
+                confirmRetrieveBtn.disabled = false;
+                confirmRetrieveBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Approve & Send Reset';
+            }
+        });
 
         // ── Helpers ───────────────────────────────────────
         // escHtml provided by utils.js as escHTML
