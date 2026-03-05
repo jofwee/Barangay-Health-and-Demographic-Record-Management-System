@@ -18,7 +18,7 @@
             <img class="inquiry-card__badge" src="86ERS%20LOGO.png" alt="Barangay 86ers logo">
 
             <!-- Concern toggle -->
-            <div class="concern">
+            <div class="concern" id="concernToggle">
                 <span class="concern__label">Concern:</span>
                 <div class="concern__actions">
                     <button class="pill pill--active" data-target="createForm" type="button">Request Account Creation</button>
@@ -53,6 +53,22 @@
                     <label for="create-email">E-mail address:</label>
                     <input id="create-email" name="email" type="email" placeholder="juandelacruz@yahoo.com" required>
                 </div>
+                <div class="field field--full">
+                    <label for="create-id">Barangay ID:</label>
+                    <div class="file-upload" id="fileUploadZone">
+                        <input id="create-id" name="barangayId" type="file" accept="image/*,.pdf" required class="file-upload__input">
+                        <div class="file-upload__placeholder" id="filePlaceholder">
+                            <span class="file-upload__icon">&#128196;</span>
+                            <span class="file-upload__text">Click or drag to upload your Barangay ID</span>
+                            <span class="file-upload__hint">JPG, PNG, or PDF (max 5MB)</span>
+                        </div>
+                        <div class="file-upload__preview" id="filePreview" style="display:none;">
+                            <img id="previewImg" alt="ID Preview">
+                            <span class="file-upload__filename" id="fileName"></span>
+                            <button type="button" class="file-upload__remove" id="removeFile">&times;</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="form-actions">
                     <button class="submit-btn" type="submit" id="createBtn">Send Request</button>
                 </div>
@@ -84,6 +100,9 @@
             <div id="successMsg" class="auth-message auth-message--success" style="display:none;">
                 <strong>Request submitted!</strong><br>
                 Please wait for an administrator to review your request.
+                <div style="margin-top: 1rem;">
+                    <a href="index.html" class="submit-btn" style="display:inline-block;text-decoration:none;padding:0.6rem 2rem;font-size:0.9rem;">Back to Main Page</a>
+                </div>
             </div>
             <div id="errorMsg" class="auth-message auth-message--error" style="display:none;"></div>
         </section>
@@ -106,7 +125,6 @@
                 pill.classList.add('pill--active');
                 forms.forEach(f => f.classList.remove('is-active'));
                 document.getElementById(pill.dataset.target).classList.add('is-active');
-                // hide messages on tab switch
                 successMsg.style.display = 'none';
                 errorMsg.style.display = 'none';
             });
@@ -114,6 +132,97 @@
 
         const successMsg = document.getElementById('successMsg');
         const errorMsg = document.getElementById('errorMsg');
+
+        /* ── Compress image to base64 ── */
+        function compressImage(file, maxDim = 1200, quality = 0.6) {
+            return new Promise((resolve, reject) => {
+                if (!file.type.startsWith('image/')) {
+                    // For non-image files (PDF), read as-is
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Failed to read file.'));
+                    reader.readAsDataURL(file);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                            else        { w = Math.round(w * maxDim / h); h = maxDim; }
+                        }
+                        canvas.width = w;
+                        canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = () => reject(new Error('Failed to load image.'));
+                    img.src = ev.target.result;
+                };
+                reader.onerror = () => reject(new Error('Failed to read file.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        /* ── File upload preview ── */
+        const fileInput = document.getElementById('create-id');
+        const filePlaceholder = document.getElementById('filePlaceholder');
+        const filePreview = document.getElementById('filePreview');
+        const previewImg = document.getElementById('previewImg');
+        const fileNameEl = document.getElementById('fileName');
+        const removeFileBtn = document.getElementById('removeFile');
+        const fileUploadZone = document.getElementById('fileUploadZone');
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                errorMsg.textContent = 'File size must be under 5MB.';
+                errorMsg.style.display = 'block';
+                fileInput.value = '';
+                return;
+            }
+            fileNameEl.textContent = file.name;
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewImg.src = ev.target.result;
+                    previewImg.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewImg.style.display = 'none';
+            }
+            filePlaceholder.style.display = 'none';
+            filePreview.style.display = 'flex';
+        });
+
+        removeFileBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            filePlaceholder.style.display = 'flex';
+            filePreview.style.display = 'none';
+            previewImg.src = '';
+        });
+
+        // Drag & drop
+        fileUploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadZone.classList.add('file-upload--dragover');
+        });
+        fileUploadZone.addEventListener('dragleave', () => {
+            fileUploadZone.classList.remove('file-upload--dragover');
+        });
+        fileUploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadZone.classList.remove('file-upload--dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
 
         /* ── Account Creation request ── */
         document.getElementById('createForm').addEventListener('submit', async (e) => {
@@ -130,6 +239,15 @@
             const sex = form.sex.value;
             const email = form.email.value.trim().toLowerCase();
             const fullName = suffix ? `${firstName} ${lastName} ${suffix}` : `${firstName} ${lastName}`;
+            const idFile = fileInput.files[0];
+
+            if (!idFile) {
+                errorMsg.textContent = 'Please upload your Barangay ID.';
+                errorMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Send Request';
+                return;
+            }
 
             try {
                 const existing = await db.collection('accountRequests')
@@ -141,6 +259,16 @@
                     throw new Error('An account request with this email already exists.');
                 }
 
+                // Compress and encode Barangay ID
+                btn.textContent = 'Processing ID...';
+                const barangayIdData = await compressImage(idFile);
+
+                // Check compressed size (Firestore doc limit ~1MB)
+                if (barangayIdData.length > 900000) {
+                    throw new Error('Image is too large even after compression. Please use a smaller or lower-resolution photo.');
+                }
+
+                btn.textContent = 'Sending...';
                 await db.collection('accountRequests').add({
                     fullName,
                     firstName,
@@ -148,6 +276,7 @@
                     suffix,
                     sex,
                     email,
+                    barangayIdData,
                     type: 'creation',
                     status: 'pending',
                     assignedRole: null,
@@ -155,6 +284,7 @@
                 });
 
                 form.style.display = 'none';
+                document.getElementById('concernToggle').style.display = 'none';
                 successMsg.style.display = 'block';
             } catch (err) {
                 errorMsg.textContent = err.message;
@@ -178,7 +308,6 @@
             const fullName = form.fullName.value.trim();
 
             try {
-                // 1. Check for duplicate pending/approved retrieval requests
                 const existing = await db.collection('accountRequests')
                     .where('email', '==', email)
                     .where('type', '==', 'retrieval')
@@ -189,7 +318,6 @@
                     throw new Error('A retrieval request for this email is already pending. Please wait for admin review.');
                 }
 
-                // 2. Verify the account exists in the users collection
                 const userSnap = await db.collection('users')
                     .where('email', '==', email)
                     .limit(1)
@@ -201,21 +329,18 @@
 
                 const userData = userSnap.docs[0].data();
 
-                // 3. Verify the role matches
                 const normalizedInputRole = role.toLowerCase();
                 const normalizedUserRole = (userData.role || '').toLowerCase();
                 if (normalizedInputRole !== normalizedUserRole) {
                     throw new Error('The role you selected does not match the account on file. Please verify and try again.');
                 }
 
-                // 4. Verify the full name matches (case-insensitive)
                 const normalizedInputName = fullName.toLowerCase().replace(/\s+/g, ' ');
                 const normalizedUserName = (userData.fullName || '').toLowerCase().replace(/\s+/g, ' ');
                 if (normalizedInputName !== normalizedUserName) {
                     throw new Error('The full name does not match the account on file. Please enter your registered full name exactly.');
                 }
 
-                // 5. Save retrieval request with matched user info
                 await db.collection('accountRequests').add({
                     fullName,
                     email,
@@ -227,7 +352,8 @@
                 });
 
                 form.style.display = 'none';
-                successMsg.innerHTML = '<strong>Retrieval request submitted!</strong><br>An administrator will review your request and send a password reset to your email.';
+                document.getElementById('concernToggle').style.display = 'none';
+                successMsg.innerHTML = '<strong>Retrieval request submitted!</strong><br>An administrator will review your request and send a password reset to your email.<div style="margin-top: 1rem;"><a href="index.html" class="submit-btn" style="display:inline-block;text-decoration:none;padding:0.6rem 2rem;font-size:0.9rem;">Back to Main Page</a></div>';
                 successMsg.style.display = 'block';
             } catch (err) {
                 errorMsg.textContent = err.message;

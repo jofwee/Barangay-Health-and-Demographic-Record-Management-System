@@ -27,12 +27,6 @@
                 <label for="reg-confirm">Confirm Password:</label>
                 <input id="reg-confirm" name="confirmPassword" type="password" placeholder="Re-enter your password" minlength="6" required>
 
-                <label for="reg-role">Role:</label>
-                <select id="reg-role" name="role" class="auth-select" required>
-                    <option value="staff">Staff</option>
-                    <option value="bhw">BHW</option>
-                </select>
-
                 <button class="auth-btn" type="submit" id="registerBtn">Create Account</button>
             </form>
 
@@ -85,6 +79,17 @@
                     .get();
 
                 if (snap.empty) {
+                    // Check if there's a pending request
+                    const pendingSnap = await db.collection('accountRequests')
+                        .where('email', '==', email)
+                        .where('status', '==', 'pending')
+                        .limit(1)
+                        .get();
+
+                    if (!pendingSnap.empty) {
+                        throw new Error('Your account request is still pending. Please wait for an administrator to approve it before completing registration.');
+                    }
+
                     throw new Error('No approved account request found for this email. Please request an account first or wait for admin approval.');
                 }
 
@@ -100,13 +105,13 @@
                         displayName: requestData.fullName
                     });
 
-                    // 4. Store user data with role chosen by user in Firestore
-                    const role = form.role.value;
+                    // 4. Store user data with admin-assigned role in Firestore
+                    const role = (requestData.assignedRole || 'staff').toLowerCase();
                     await db.collection('users').doc(cred.user.uid).set({
                         email: email,
                         fullName: requestData.fullName,
                         contactNumber: requestData.contactNumber || '',
-                        role: role,   // 'staff' or 'bhw'
+                        role: role,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
