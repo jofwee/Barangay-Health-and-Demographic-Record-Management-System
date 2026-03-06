@@ -232,6 +232,124 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'Senior Citizens';
     }
 
+    // ── 5. Add New Resident Modal ──────────────────────────
+    const addModal = document.getElementById('addResidentModal');
+    const addForm = document.getElementById('addResidentForm');
+
+    window.openAddResidentModal = function() {
+        if (addForm) addForm.reset();
+        if (addModal) addModal.style.display = 'flex';
+    };
+
+    window.closeAddResidentModal = function() {
+        if (addModal) addModal.style.display = 'none';
+        if (addForm) addForm.reset();
+    };
+
+    // Close on backdrop click
+    if (addModal) {
+        addModal.addEventListener('click', (e) => {
+            if (e.target === addModal) closeAddResidentModal();
+        });
+    }
+
+    if (addForm) {
+        addForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('addResidentBtn');
+            btn.disabled = true;
+            btn.textContent = 'Registering...';
+
+            const firstname = document.getElementById('add-firstname').value.trim();
+            const middlename = document.getElementById('add-middlename').value.trim();
+            const surname = document.getElementById('add-surname').value.trim();
+            const suffix = document.getElementById('add-suffix').value.trim();
+            const age = parseInt(document.getElementById('add-age').value.trim(), 10);
+            const sex = document.getElementById('add-sex').value;
+            const address = document.getElementById('add-address').value.trim();
+            const contact = document.getElementById('add-contact').value.trim();
+            const isPwd = document.getElementById('add-pwd').checked;
+
+            // Classification
+            let classification = 'Adults';
+            if (isPwd) {
+                classification = 'PWDs';
+            } else if (age < 5) {
+                classification = 'Infant';
+            } else if (age <= 12) {
+                classification = 'Kids';
+            } else if (age <= 19) {
+                classification = 'Teenagers';
+            } else if (age <= 59) {
+                classification = 'Adults';
+            } else {
+                classification = 'Senior Citizens';
+            }
+
+            // Generate Health ID
+            const initials = (firstname.charAt(0) + surname.charAt(0)).toUpperCase();
+            const yearSuffix = new Date().getFullYear().toString().slice(-2);
+            let healthId = `B86${initials}${age}${yearSuffix}`;
+
+            try {
+                // Ensure unique Health ID
+                let isUnique = false;
+                let attempts = 0;
+                while (!isUnique && attempts < 5) {
+                    const existing = await db.collection('residents')
+                        .where('healthId', '==', healthId).limit(1).get();
+                    if (existing.empty) {
+                        isUnique = true;
+                    } else {
+                        const rnd = Math.floor(Math.random() * 900 + 100);
+                        healthId = `B86${initials}${age}${yearSuffix}${rnd}`;
+                        attempts++;
+                    }
+                }
+                if (!isUnique) {
+                    alert('Could not generate a unique Health ID. Please try again.');
+                    btn.disabled = false;
+                    btn.textContent = 'Register Resident';
+                    return;
+                }
+
+                await db.collection('residents').add({
+                    healthId,
+                    surname,
+                    suffix,
+                    firstName: firstname,
+                    middleName: middlename,
+                    age,
+                    sex,
+                    address,
+                    contactNumber: contact,
+                    classification,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: auth.currentUser ? auth.currentUser.email : 'Unknown Staff'
+                });
+
+                if (auth.currentUser) {
+                    await db.collection('activityLogs').add({
+                        userEmail: auth.currentUser.email,
+                        action: `Registered new resident: ${firstname} ${surname} (${healthId})`,
+                        location: 'Residents\' Management',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                closeAddResidentModal();
+                loadResidents();
+                alert(`Resident registered successfully!\nHealth ID: ${healthId}`);
+            } catch (error) {
+                console.error('Error adding resident:', error);
+                alert('Error saving record: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Register Resident';
+            }
+        });
+    }
+
     // Run the fetch when the page loads
     loadResidents();
 });

@@ -76,12 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Define colors that match your CSS/Legend vibes
         const colorMap = {
-            'Infant': '#20c997',        // Mint
-            'Kids': '#0dcaf0',          // Sea
-            'Teenagers': '#ffc107',     // Yellow
-            'Adults': '#198754',        // Green
-            'Senior Citizens': '#dc3545',// Red
-            'PWDs': '#d63384'           // Pink
+            'Infant': '#9ae9e0',        // Pastel Mint
+            'Kids': '#b388ff',          // Pastel Lavender
+            'Teenagers': '#fde68a',     // Pastel Yellow
+            'Adults': '#7bf2a8',        // Pastel Green
+            'Senior Citizens': '#ff9f9f',// Pastel Red
+            'PWDs': '#f7b2f9'           // Pastel Pink
         };
 
         // Build a CSS conic-gradient dynamically!

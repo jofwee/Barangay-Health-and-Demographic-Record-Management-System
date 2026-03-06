@@ -128,7 +128,7 @@
                             </svg>
                         </button>
                     </div>
-                    <button class="add-med-btn" onclick="window.location.href='staff-rbi.html'">
+                    <button class="add-med-btn" onclick="openAddResidentModal()">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 5v14" />
                             <path d="M5 12h14" />
@@ -168,6 +168,66 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Add Resident Modal -->
+    <div id="addResidentModal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <h2>Add New Resident</h2>
+            <form id="addResidentForm" class="auth-form" style="text-align: left;">
+                <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                    <div style="flex:1;">
+                        <label class="modal-label" for="add-firstname">First Name <span style="color:#c44;">*</span></label>
+                        <input type="text" id="add-firstname" class="modal-select" placeholder="Juan" required>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="modal-label" for="add-middlename">Middle Name</label>
+                        <input type="text" id="add-middlename" class="modal-select" placeholder="Santos">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                    <div style="flex:1;">
+                        <label class="modal-label" for="add-surname">Surname <span style="color:#c44;">*</span></label>
+                        <input type="text" id="add-surname" class="modal-select" placeholder="Dela Cruz" required>
+                    </div>
+                    <div style="flex:0 0 5rem;">
+                        <label class="modal-label" for="add-suffix">Suffix</label>
+                        <input type="text" id="add-suffix" class="modal-select" placeholder="Jr.">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                    <div style="flex:1;">
+                        <label class="modal-label" for="add-age">Age <span style="color:#c44;">*</span></label>
+                        <input type="number" id="add-age" class="modal-select" min="0" max="150" required>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="modal-label" for="add-sex">Sex <span style="color:#c44;">*</span></label>
+                        <select id="add-sex" class="modal-select" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label class="modal-label" for="add-address">Address <span style="color:#c44;">*</span></label>
+                <input type="text" id="add-address" class="modal-select" placeholder="Zone/Purok, Barangay" required>
+
+                <label class="modal-label" for="add-contact">Contact Number</label>
+                <input type="text" id="add-contact" class="modal-select" placeholder="09xxxxxxxxx">
+
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;">
+                    <input type="checkbox" id="add-pwd" style="width:auto;">
+                    <label for="add-pwd" class="modal-label" style="margin:0;">Person with Disability (PWD)</label>
+                </div>
+
+                <div class="modal-actions" style="margin-top: 1rem;">
+                    <button type="submit" class="btn btn--approve" id="addResidentBtn">Register Resident</button>
+                    <button type="button" class="btn btn--cancel" onclick="closeAddResidentModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <div id="editResidentModal" class="modal-overlay" style="display:none;">

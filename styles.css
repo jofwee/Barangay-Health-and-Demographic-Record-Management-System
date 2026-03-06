@@ -1044,12 +1044,12 @@ h1 {
     display: inline-block;
 }
 
-.dot--mint { background: #9ae9e0; }
-.dot--sea { background: #b388ff; }
-.dot--yellow { background: #fde68a; }
-.dot--green { background: #7bf2a8; }
-.dot--red { background: #ff9f9f; }
-.dot--pink { background: #f7b2f9; }
+.dot--mint { background: #9ae9e0; }    /* Infants */
+.dot--sea { background: #b388ff; }     /* Kids */
+.dot--yellow { background: #fde68a; }  /* Teenagers */
+.dot--green { background: #7bf2a8; }   /* Adults */
+.dot--red { background: #ff9f9f; }     /* Senior Citizens */
+.dot--pink { background: #f7b2f9; }    /* PWDs */
 
 .panel--bars .panel__body {
     justify-content: space-between;
@@ -2037,7 +2037,7 @@ h1 {
     align-items: flex-end;
     gap: 0;
     height: 220px;
-    padding-left: 3.5rem;
+    padding-left: 4.5rem;
     position: relative;
 }
 
@@ -2059,7 +2059,7 @@ h1 {
 
 .report-bar-chart__y-label {
     position: absolute;
-    left: -1.5rem;
+    left: -3rem;
     top: 50%;
     transform: translateY(-50%) rotate(-90deg);
     font-size: 0.65rem;

@@ -64,10 +64,9 @@
     if (cached) {
         populateUI(cached.fullName, cached.email, cached.role);
 
-        // Show admin nav item immediately from cache
+        // Build admin sidebar from cache
         if (cached.role === 'admin') {
-            const adminNav = document.getElementById('adminNavItem');
-            if (adminNav) adminNav.style.display = '';
+            buildAdminSidebar();
         }
 
         // Restore cached avatar immediately
@@ -82,7 +81,8 @@
         // Reveal immediately from cache if role matches (don't wait for Firebase)
         if (!requiredRole ||
             cached.role === requiredRole ||
-            (requiredRole === 'staff' && cached.role === 'admin')) {
+            (requiredRole === 'staff' && cached.role === 'admin') ||
+            (requiredRole === 'bhw' && cached.role === 'admin')) {
             revealPage();
         }
     }
@@ -107,17 +107,18 @@
             const fullName = data.fullName || user.displayName || 'User';
             const email = data.email || user.email || '';
 
-            // Role check — admin can access staff pages AND admin-only pages
+            // Role check — admin can access staff, bhw, AND admin-only pages
             if (requiredRole) {
                 const allowed =
                     role === requiredRole ||
-                    (requiredRole === 'staff' && role === 'admin');
+                    (requiredRole === 'staff' && role === 'admin') ||
+                    (requiredRole === 'bhw' && role === 'admin');
 
                 if (!allowed) {
                     // Redirect to their correct dashboard instead of signing out
                     if (role === 'bhw') {
                         window.location.href = 'bhw-dashboard.html';
-                    } else if (role === 'staff') {
+                    } else if (role === 'staff' || role === 'admin') {
                         window.location.href = 'staff-dashboard.html';
                     } else {
                         auth.signOut();
@@ -131,10 +132,9 @@
             sessionStorage.setItem('authUser', JSON.stringify({ fullName, email, role }));
             populateUI(fullName, email, role);
 
-            // ── Show admin-only nav item if admin ──
+            // ── Build full admin sidebar ──
             if (role === 'admin') {
-                const adminNav = document.getElementById('adminNavItem');
-                if (adminNav) adminNav.style.display = '';
+                buildAdminSidebar();
             }
 
             // ── Load avatar into sidebar & banner (+ cache) ──
@@ -164,6 +164,69 @@
             console.error('Auth guard error:', err);
         }
     });
+
+    // ── Build admin sidebar (replaces nav with full combined items) ──
+    function buildAdminSidebar() {
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        if (!sidebarNav) return;
+
+        // Fix profile link for admin
+        const profileLink = document.querySelector('.profile-link');
+        if (profileLink) profileLink.href = 'staff-profile.html';
+
+        const currentPage = window.location.pathname.split('/').pop() || 'staff-dashboard.html';
+
+        const navItems = [
+            {
+                href: 'staff-dashboard.html',
+                label: 'Dashboard',
+                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>'
+            },
+            {
+                href: 'medicine-inventory.html',
+                label: 'Medicine Inventory',
+                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h4a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z"/><path d="M7 12h8"/><path d="M15 6h2a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-2"/></svg>'
+            },
+            {
+                href: 'staff-residents.html',
+                label: "Residents' Management",
+                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="18" cy="8" r="2.5"/><path d="M21 20v-1.5a3 3 0 0 0-3-3h-.5"/></svg>'
+            },
+            {
+                href: 'residents-maintenance.html',
+                label: "Residents' Maintenance",
+                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="3"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><rect x="3" y="10" width="5" height="7" rx="1.2"/><path d="M5.5 11.5v4"/><path d="M4 13.5h3"/></svg>'
+            },
+            {
+                href: 'staff-reports.html',
+                label: 'Reports',
+                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20v-6"/><path d="M12 20V8"/><path d="M18 20v-10"/><path d="M4 20h16"/></svg>'
+            },
+            {
+                href: 'staff-about.html',
+                label: 'About',
+                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h0"/></svg>'
+            },
+            {
+                href: 'admin-accounts.html',
+                label: 'Account Requests',
+                classes: 'nav-item--admin',
+                id: 'adminNavItem',
+                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8l2 2 4-4"/></svg>'
+            }
+        ];
+
+        sidebarNav.innerHTML = '';
+        navItems.forEach(function(item) {
+            var a = document.createElement('a');
+            a.href = item.href;
+            a.className = 'nav-item' + (item.classes ? ' ' + item.classes : '') + (currentPage === item.href ? ' is-active' : '');
+            if (item.id) a.id = item.id;
+            a.title = item.label;
+            a.innerHTML = '<span class="nav-item__icon" aria-hidden="true">' + item.icon + '</span><span class="nav-item__label">' + item.label + '</span>';
+            sidebarNav.appendChild(a);
+        });
+    }
 
     // ── Wire user-pill button to navigate to profile ──
     const userPillBtn = document.querySelector('.user-pill');
