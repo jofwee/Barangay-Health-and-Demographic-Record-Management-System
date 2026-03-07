@@ -38,16 +38,7 @@
         if (sidebarName) sidebarName.textContent = fullName;
         if (sidebarRole) sidebarRole.textContent = roleLabels[role] || role;
 
-        const userPill = document.querySelector('.user-pill span');
-        if (userPill) {
-            const initials = fullName
-                .split(' ')
-                .map(w => w[0])
-                .join('')
-                .substring(0, 2)
-                .toUpperCase();
-            userPill.textContent = initials;
-        }
+
 
         const bannerName = document.querySelector('.profile-banner__info h2');
         const bannerEmail = document.querySelector('.profile-banner__info p');
@@ -228,20 +219,7 @@
         });
     }
 
-    // ── Wire user-pill button to navigate to profile ──
-    const userPillBtn = document.querySelector('.user-pill');
-    if (userPillBtn) {
-        userPillBtn.style.cursor = 'pointer';
-        userPillBtn.addEventListener('click', () => {
-            const cachedUser = JSON.parse(sessionStorage.getItem('authUser') || '{}');
-            const role = cachedUser.role || '';
-            if (role === 'bhw') {
-                window.location.href = 'bhw-profile.html';
-            } else {
-                window.location.href = 'staff-profile.html';
-            }
-        });
-    }
+
 
     // ── Logout handler ─────────────────────────────────
     const logoutBtn = document.querySelector('.logout-btn');

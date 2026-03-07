@@ -115,9 +115,6 @@
                 <div>
                     <h1>Barangay Health and Demographic Record Management System</h1>
                 </div>
-                <button class="user-pill" aria-label="User menu">
-                    <span></span>
-                </button>
             </header>
 
             <!-- Page title -->
@@ -463,7 +460,7 @@
                         <div class="request-card-v2__details">
                             <span><i class="fas fa-envelope"></i> ${escHtml(d.email)}</span>
                             <span><i class="fas fa-phone"></i> ${escHtml(d.contactNumber || '—')}</span>
-                            ${d.barangayIdData ? `<a href="#" onclick="event.preventDefault(); showIdPreview('${d.id}')" class="request-card-v2__id-link"><i class="fas fa-id-card"></i> View Barangay ID</a>` : ''}
+                            ${d.barangayIdData ? `<a href="#" onclick="event.preventDefault(); showIdPreview('${d.id}')" class="request-card-v2__id-link"><i class="fas fa-id-card"></i> View Government ID</a>` : ''}
                         </div>
                         ${d.reason ? `<p class="request-card-v2__reason"><i class="fas fa-comment-alt"></i> ${escHtml(d.reason)}</p>` : ''}
                         <div class="request-card-v2__footer">
@@ -508,19 +505,19 @@
             });
         });
 
-        // ── View Barangay ID preview (opens in new tab) ──
+        // ── View Government ID preview (opens in new tab) ──
         function showIdPreview(docId) {
             const reqData = allRequestsCache.find(r => r.id === docId);
             if (reqData && reqData.barangayIdData) {
                 const win = window.open();
-                win.document.write('<html><head><title>Barangay ID<\/title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f0f4fa;}img{max-width:95vw;max-height:95vh;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,.15)}<\/style><\/head><body><img src="' + reqData.barangayIdData + '" alt="Barangay ID"><\/body><\/html>');
+                win.document.write('<html><head><title>Government ID<\/title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f0f4fa;}img{max-width:95vw;max-height:95vh;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,.15)}<\/style><\/head><body><img src="' + reqData.barangayIdData + '" alt="Government ID"><\/body><\/html>');
             }
         }
 
         // ── Approve modal ─────────────────────────────────
         function openApproveModal(docId, name, email, contact) {
             pendingApprovalId = docId;
-            // Look up the barangay ID data from cache
+            // Look up the government ID data from cache
             const reqData = allRequestsCache.find(r => r.id === docId);
             const idData = reqData ? reqData.barangayIdData : null;
             modalDetails.innerHTML = `
@@ -534,9 +531,9 @@
                 </div>
                 ${idData ? `
                 <div class="admin-modal__id-preview">
-                    <label><i class="fas fa-id-card"></i> Barangay ID</label>
+                    <label><i class="fas fa-id-card"></i> Government ID</label>
                     <a href="${idData}" target="_blank">
-                        <img src="${idData}" alt="Barangay ID" onerror="this.parentElement.innerHTML='PDF file attached'">
+                        <img src="${idData}" alt="Government ID" onerror="this.parentElement.innerHTML='PDF file attached'">
                     </a>
                 </div>` : ''}`;
             roleSelect.value = '';

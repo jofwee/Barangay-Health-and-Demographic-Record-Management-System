@@ -6,37 +6,111 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!rbiForm) return;
 
+    // ── Auto-calculate Age from Date of Birth ──
+    const dobMM = document.getElementById('rbi-dob-mm');
+    const dobDD = document.getElementById('rbi-dob-dd');
+    const dobYYYY = document.getElementById('rbi-dob-yyyy');
+    const ageInput = document.getElementById('rbi-age');
+
+    function calcAge() {
+        const mm = parseInt(dobMM.value, 10);
+        const dd = parseInt(dobDD.value, 10);
+        const yyyy = parseInt(dobYYYY.value, 10);
+        if (!mm || !dd || !yyyy || yyyy < 1900) { ageInput.value = ''; return; }
+        const today = new Date();
+        const birth = new Date(yyyy, mm - 1, dd);
+        if (isNaN(birth.getTime())) { ageInput.value = ''; return; }
+        let age = today.getFullYear() - birth.getFullYear();
+        const mDiff = today.getMonth() - birth.getMonth();
+        if (mDiff < 0 || (mDiff === 0 && today.getDate() < birth.getDate())) age--;
+        ageInput.value = age >= 0 ? age : '';
+    }
+    if (dobMM && dobDD && dobYYYY) {
+        dobMM.addEventListener('input', calcAge);
+        dobDD.addEventListener('input', calcAge);
+        dobYYYY.addEventListener('input', calcAge);
+    }
+
+    // ── PWD toggle ──
+    const pwdRadios = document.querySelectorAll('input[name="pwd"]');
+    const pwdDetailField = document.getElementById('pwdDetailField');
+    pwdRadios.forEach(r => r.addEventListener('change', () => {
+        pwdDetailField.style.display = r.value === 'yes' && r.checked ? 'flex' : 'none';
+    }));
+
+    // ── Medication toggle ──
+    const medRadios = document.querySelectorAll('input[name="medication"]');
+    const medicationDetails = document.getElementById('medicationDetails');
+    medRadios.forEach(r => r.addEventListener('change', () => {
+        medicationDetails.style.display = r.value === 'yes' && r.checked ? 'flex' : 'none';
+    }));
+
+    // ── Condition "Other" toggle ──
+    const conditionSelect = document.getElementById('rbi-condition');
+    const conditionOtherField = document.getElementById('conditionOtherField');
+    if (conditionSelect) {
+        conditionSelect.addEventListener('change', () => {
+            conditionOtherField.style.display = conditionSelect.value === 'Other' ? 'flex' : 'none';
+        });
+    }
+
+    // ── Form Submission ──
     rbiForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Prevent the page from refreshing
-        
-        // Disable button to prevent double-clicks
+        e.preventDefault();
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
 
-        // 1. Gather Data from the form inputs
+        // 1. Gather Data
         const surname = document.getElementById('rbi-surname').value.trim();
         const suffix = document.getElementById('rbi-suffix').value.trim();
         const firstname = document.getElementById('rbi-firstname').value.trim();
-        const age = document.getElementById('rbi-age').value.trim();
         const middlename = document.getElementById('rbi-middlename').value.trim();
+        const age = ageInput.value.trim();
         const sex = document.getElementById('rbi-sex').value.trim();
-        const address = document.getElementById('rbi-address').value.trim();
+        const civilStatus = document.getElementById('rbi-civil-status').value.trim();
+        const bloodType = document.getElementById('rbi-blood-type').value;
+        const occupation = document.getElementById('rbi-occupation').value.trim();
+        const streetNo = document.getElementById('rbi-street-no').value.trim();
+        const streetName = document.getElementById('rbi-street-name').value.trim();
+        const address = [streetNo, streetName].filter(Boolean).join(' ');
         const contact = document.getElementById('rbi-contact').value.trim();
+        const email = document.getElementById('rbi-email').value.trim();
+        const pobProvince = document.getElementById('rbi-pob-province').value.trim();
+        const pobCity = document.getElementById('rbi-pob-city').value.trim();
+        const placeOfBirth = [pobProvince, pobCity].filter(Boolean).join(', ');
+        const nationality = document.getElementById('rbi-nationality').value.trim();
+        const outsidePH = document.getElementById('rbi-outside-ph').checked;
 
-        // 2. Basic Validation (Ensure required fields aren't empty)
+        // DOB
+        const mm = dobMM.value.trim();
+        const dd = dobDD.value.trim();
+        const yyyy = dobYYYY.value.trim();
+        const dateOfBirth = (mm && dd && yyyy) ? `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}` : '';
+
+        // Medical
+        const isPwd = document.querySelector('input[name="pwd"]:checked')?.value === 'yes';
+        const disability = isPwd ? (document.getElementById('rbi-disability')?.value.trim() || '') : '';
+        const isMedication = document.querySelector('input[name="medication"]:checked')?.value === 'yes';
+        const medName = isMedication ? (document.getElementById('rbi-med-name')?.value.trim() || '') : '';
+        const medDosage = isMedication ? (document.getElementById('rbi-med-dosage')?.value.trim() || '') : '';
+        const medQty = isMedication ? (document.getElementById('rbi-med-qty')?.value.trim() || '') : '';
+        const conditionVal = isMedication ? (document.getElementById('rbi-condition')?.value || '') : '';
+        const conditionOther = isMedication ? (document.getElementById('rbi-condition-other')?.value.trim() || '') : '';
+        const condition = conditionVal === 'Other' ? conditionOther : conditionVal;
+
+        // 2. Validation
         if (!surname || !firstname || !age || !sex || !address) {
-            alert('Please fill in all required fields (Surname, First Name, Age, Sex, Address).');
+            alert('Please fill in all required fields (Surname, First Name, Date of Birth, Sex, Address).');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
+            submitBtn.textContent = 'DONE';
             return;
         }
 
-        // 3. Generate a Health ID (Format: B86 + Initials + Age + Last 2 digits of current year)
+        // 3. Generate Health ID
         const initials = (firstname.charAt(0) + surname.charAt(0)).toUpperCase();
         const yearSuffix = new Date().getFullYear().toString().slice(-2);
         let healthId = `B86${initials}${age}${yearSuffix}`;
 
-        // Check for uniqueness and append random suffix until unique
         try {
             let isUnique = false;
             let attempts = 0;
@@ -46,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (existing.empty) {
                     isUnique = true;
                 } else {
-                    const rnd = Math.floor(Math.random() * 900 + 100); // 3-digit random
+                    const rnd = Math.floor(Math.random() * 900 + 100);
                     healthId = `B86${initials}${age}${yearSuffix}${rnd}`;
                     attempts++;
                 }
@@ -54,16 +128,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isUnique) {
                 alert('Could not generate a unique Health ID after multiple attempts. Please try again.');
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit';
+                submitBtn.textContent = 'DONE';
                 return;
             }
-        } catch (e) {
-            console.warn('Could not check Health ID uniqueness:', e);
+        } catch (err) {
+            console.warn('Could not check Health ID uniqueness:', err);
         }
 
-        // 4. Calculate Classification automatically based on Age
+        // 4. Classification
         const ageNum = parseInt(age, 10);
-        const isPwd = document.getElementById('rbi-pwd') && document.getElementById('rbi-pwd').checked;
         let classification = 'Adults';
         if (isPwd) {
             classification = 'PWDs';
@@ -82,22 +155,36 @@ document.addEventListener('DOMContentLoaded', () => {
         // 5. Save to Firestore
         try {
             await db.collection('residents').add({
-                healthId: healthId,
-                surname: surname,
-                suffix: suffix,
+                healthId,
+                surname,
+                suffix,
                 firstName: firstname,
                 middleName: middlename,
                 age: ageNum,
-                sex: sex,
-                address: address,
+                dateOfBirth,
+                placeOfBirth,
+                nationality,
+                outsidePH,
+                sex,
+                civilStatus,
+                bloodType,
+                occupation,
+                address,
                 contactNumber: contact,
-                classification: classification,
+                email,
+                isPwd,
+                disability,
+                isMedication,
+                medicationName: medName,
+                medicationDosage: medDosage,
+                medicationQty: medQty,
+                condition,
+                classification,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                // Store who created this record
-                createdBy: auth.currentUser ? auth.currentUser.email : 'Unknown Staff' 
+                createdBy: auth.currentUser ? auth.currentUser.email : 'Unknown Staff'
             });
 
-            // --- RECORD ACTIVITY LOG ---
+            // Activity log
             if (auth.currentUser) {
                 await db.collection('activityLogs').add({
                     userEmail: auth.currentUser.email,
@@ -107,17 +194,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // 6. Success! Reset the form and notify the user
-            alert(`Resident successfully registered!\nGenerated Health ID: ${healthId}`);
+            // 6. Show success modal
+            showSuccessModal(healthId);
             rbiForm.reset();
+            if (pwdDetailField) pwdDetailField.style.display = 'none';
+            if (medicationDetails) medicationDetails.style.display = 'none';
+            if (conditionOtherField) conditionOtherField.style.display = 'none';
 
         } catch (error) {
             console.error('Error adding resident: ', error);
             alert('Error saving record: ' + error.message);
         } finally {
-            // Re-enable the button
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
+            submitBtn.textContent = 'DONE';
         }
     });
+
+    // ── Success Modal ──
+    function showSuccessModal(healthId) {
+        // Remove existing modal if any
+        const existing = document.getElementById('rbiSuccessModal');
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'rbiSuccessModal';
+        modal.className = 'rbi-success-overlay';
+        modal.innerHTML = `
+            <div class="rbi-success-card">
+                <div class="rbi-success-header">
+                    <h2>THANK YOU FOR REGISTERING!</h2>
+                </div>
+                <div class="rbi-success-body">
+                    <p>Please save or remember your Unique Health ID Number, as it will be used for future transactions and references at the Barangay.</p>
+                    <span class="rbi-success-label">HEALTH ID NUMBER:</span>
+                    <span class="rbi-success-id">${healthId}</span>
+                </div>
+                <button class="rbi-success-close" id="closeSuccessModal">Close</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('closeSuccessModal').addEventListener('click', () => {
+            modal.remove();
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
 });

@@ -110,35 +110,75 @@
                 <h2 class="rbi-title">RBI FORM</h2>
 
                 <div class="rbi-card">
-                    <form class="rbi-form">
-                        <div class="rbi-row">
+                    <form class="rbi-form" id="rbiForm">
+                        <!-- ═══ I. PERSONAL INFORMATION ═══ -->
+                        <h3 class="rbi-section-heading">I. PERSONAL INFORMATION</h3>
+
+                        <div class="rbi-row rbi-row--4col">
                             <div class="rbi-field">
                                 <label for="rbi-surname">Surname:</label>
                                 <input id="rbi-surname" type="text" placeholder="Type...">
                             </div>
-                            <div class="rbi-field rbi-field--small">
-                                <label for="rbi-suffix">Suffix:</label>
-                                <input id="rbi-suffix" type="text" placeholder="Type...">
-                            </div>
-                        </div>
-
-                        <div class="rbi-row">
                             <div class="rbi-field">
                                 <label for="rbi-firstname">First Name:</label>
                                 <input id="rbi-firstname" type="text" placeholder="Type...">
                             </div>
-                            <div class="rbi-field rbi-field--small">
-                                <label for="rbi-age">Age:</label>
-                                <input id="rbi-age" type="number" min="0" max="150" placeholder="Type...">
-                            </div>
-                        </div>
-
-                        <div class="rbi-row">
                             <div class="rbi-field">
                                 <label for="rbi-middlename">Middle Name:</label>
                                 <input id="rbi-middlename" type="text" placeholder="Type...">
                             </div>
                             <div class="rbi-field rbi-field--small">
+                                <label for="rbi-suffix">Suffix:</label>
+                                <select id="rbi-suffix">
+                                    <option value="" selected>Select</option>
+                                    <option value="Jr.">Jr.</option>
+                                    <option value="Sr.">Sr.</option>
+                                    <option value="II">II</option>
+                                    <option value="III">III</option>
+                                    <option value="IV">IV</option>
+                                    <option value="V">V</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="rbi-row rbi-row--dob">
+                            <div class="rbi-field">
+                                <label>Date of Birth:</label>
+                                <div class="rbi-dob-group">
+                                    <input id="rbi-dob-mm" type="number" min="1" max="12" placeholder="mm">
+                                    <input id="rbi-dob-dd" type="number" min="1" max="31" placeholder="dd">
+                                    <input id="rbi-dob-yyyy" type="number" min="1900" max="2030" placeholder="yyyy">
+                                </div>
+                            </div>
+                            <div class="rbi-field rbi-field--small">
+                                <label for="rbi-age">Age:</label>
+                                <input id="rbi-age" type="number" min="0" max="150" placeholder="auto-generated" readonly>
+                            </div>
+                        </div>
+
+                        <div class="rbi-row">
+                            <div class="rbi-field">
+                                <label for="rbi-pob-province">Place of Birth:</label>
+                                <div class="rbi-pob-group">
+                                    <input id="rbi-pob-province" type="text" placeholder="Province">
+                                    <input id="rbi-pob-city" type="text" placeholder="City">
+                                </div>
+                            </div>
+                            <div class="rbi-field">
+                                <label for="rbi-nationality">Nationality:</label>
+                                <input id="rbi-nationality" type="text" placeholder="e.g. Filipino">
+                            </div>
+                        </div>
+
+                        <div class="rbi-row rbi-row--checkbox-row">
+                            <label class="rbi-checkbox-label">
+                                <input id="rbi-outside-ph" type="checkbox">
+                                Outside the Philippines
+                            </label>
+                        </div>
+
+                        <div class="rbi-row">
+                            <div class="rbi-field">
                                 <label for="rbi-sex">Sex:</label>
                                 <select id="rbi-sex" required>
                                     <option value="" disabled selected>Select...</option>
@@ -146,25 +186,127 @@
                                     <option value="Female">Female</option>
                                 </select>
                             </div>
+                            <div class="rbi-field">
+                                <label for="rbi-civil-status">Civil Status:</label>
+                                <select id="rbi-civil-status">
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="Single">Single</option>
+                                    <option value="Married">Married</option>
+                                    <option value="Widowed">Widowed</option>
+                                    <option value="Separated">Separated</option>
+                                </select>
+                            </div>
+                            <div class="rbi-field">
+                                <label for="rbi-blood-type">Blood Type:</label>
+                                <select id="rbi-blood-type">
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="rbi-field rbi-field--full">
-                            <label for="rbi-address">Address:</label>
-                            <input id="rbi-address" type="text" placeholder="Type...">
+                            <label for="rbi-occupation">Occupation:</label>
+                            <input id="rbi-occupation" type="text" placeholder="Type...">
                         </div>
 
-                        <div class="rbi-field rbi-field--half">
-                            <label for="rbi-contact">Contact No.</label>
-                            <input id="rbi-contact" type="text" placeholder="Type...">
+                        <div class="rbi-field rbi-field--full">
+                            <label>Residence Address:</label>
+                            <div class="rbi-address-group">
+                                <input id="rbi-street-no" type="text" placeholder="Street No.">
+                                <input id="rbi-street-name" type="text" placeholder="Street Name">
+                            </div>
                         </div>
 
-                        <div class="rbi-field rbi-field--half" style="display:flex; align-items:center; gap:0.5rem; padding-top:0.5rem;">
-                            <input id="rbi-pwd" type="checkbox" style="width:18px; height:18px; cursor:pointer;">
-                            <label for="rbi-pwd" style="margin:0; cursor:pointer; font-weight:500;">Person with Disability (PWD)</label>
+                        <div class="rbi-row">
+                            <div class="rbi-field">
+                                <label for="rbi-contact">Contact Number:</label>
+                                <input id="rbi-contact" type="text" placeholder="XXXXXXXXXX">
+                            </div>
+                            <div class="rbi-field">
+                                <label for="rbi-email">E-mail Address:</label>
+                                <input id="rbi-email" type="email" placeholder="sample@yahoo.com">
+                            </div>
+                        </div>
+
+                        <!-- ═══ II. MEDICAL INFORMATION ═══ -->
+                        <h3 class="rbi-section-heading">II. MEDICAL INFORMATION</h3>
+
+                        <div class="rbi-row rbi-row--medical-toggles">
+                            <div class="rbi-toggle-group">
+                                <label class="rbi-toggle-label">Are you a Person with Disability (PWD)?</label>
+                                <div class="rbi-radio-pair">
+                                    <label><input type="radio" name="pwd" value="yes"> Yes</label>
+                                    <label><input type="radio" name="pwd" value="no" checked> No</label>
+                                </div>
+                                <div class="rbi-field rbi-pwd-detail" id="pwdDetailField" style="display:none;">
+                                    <label for="rbi-disability">Disability</label>
+                                    <input id="rbi-disability" type="text" placeholder="________________">
+                                </div>
+                            </div>
+                            <div class="rbi-toggle-group">
+                                <label class="rbi-toggle-label">Are you taking any medications or maintenance?</label>
+                                <div class="rbi-radio-pair">
+                                    <label><input type="radio" name="medication" value="yes"> Yes</label>
+                                    <label><input type="radio" name="medication" value="no" checked> No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medication details (hidden by default) -->
+                        <div class="rbi-medication-details" id="medicationDetails" style="display:none;">
+                            <div class="rbi-row rbi-row--3col">
+                                <div class="rbi-field">
+                                    <label for="rbi-med-name">Name of Medication:</label>
+                                    <input id="rbi-med-name" type="text" placeholder="Type">
+                                </div>
+                                <div class="rbi-field">
+                                    <label for="rbi-med-dosage">Dosage:</label>
+                                    <input id="rbi-med-dosage" type="text" placeholder="Type">
+                                </div>
+                                <div class="rbi-field rbi-field--small">
+                                    <label for="rbi-med-qty">Qty:</label>
+                                    <input id="rbi-med-qty" type="text" placeholder="Type">
+                                </div>
+                            </div>
+                            <div class="rbi-row">
+                                <div class="rbi-field">
+                                    <label for="rbi-condition">Condition:</label>
+                                    <select id="rbi-condition">
+                                        <option value="" disabled selected>Select...</option>
+                                        <option value="Hypertension">Hypertension</option>
+                                        <option value="Diabetes">Diabetes</option>
+                                        <option value="Asthma">Asthma</option>
+                                        <option value="Tuberculosis">Tuberculosis</option>
+                                        <option value="Heart Disease">Heart Disease</option>
+                                        <option value="Kidney Disease">Kidney Disease</option>
+                                        <option value="Arthritis">Arthritis</option>
+                                        <option value="Thyroid Disorder">Thyroid Disorder</option>
+                                        <option value="Cancer">Cancer</option>
+                                        <option value="Epilepsy">Epilepsy</option>
+                                        <option value="Anemia">Anemia</option>
+                                        <option value="UTI">UTI</option>
+                                        <option value="Pneumonia">Pneumonia</option>
+                                        <option value="Dengue">Dengue</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="rbi-field" id="conditionOtherField" style="display:none;">
+                                    <label for="rbi-condition-other">Others, please specify</label>
+                                    <input id="rbi-condition-other" type="text" placeholder="Others, please specify">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="rbi-actions">
-                            <button class="submit-btn" type="submit">Submit</button>
+                            <button class="submit-btn" type="submit">DONE</button>
                         </div>
                     </form>
                 </div>

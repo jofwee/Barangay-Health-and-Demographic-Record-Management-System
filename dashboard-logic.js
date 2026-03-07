@@ -105,6 +105,41 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             pieContainer.style.background = '#e9ecef'; // Empty state gray
         }
+
+        // Update legend with counts
+        const legendMap = {
+            'Infant': 'mint',
+            'Kids': 'sea',
+            'Teenagers': 'yellow',
+            'Adults': 'green',
+            'Senior Citizens': 'red',
+            'PWDs': 'pink'
+        };
+        const legendLabels = {
+            'Infant': 'Infants',
+            'Kids': 'Kids',
+            'Teenagers': 'Teenagers',
+            'Adults': 'Adults',
+            'Senior Citizens': 'Senior Citizens',
+            'PWDs': 'PWDs'
+        };
+        const legendEl = document.querySelector('.legend');
+        if (legendEl) {
+            legendEl.innerHTML = '';
+            for (const [cls, dotClass] of Object.entries(legendMap)) {
+                const li = document.createElement('li');
+                const pct = total > 0 ? ((counts[cls] / total) * 100).toFixed(1) : '0.0';
+                li.innerHTML = `<span class="dot dot--${dotClass}"></span>${legendLabels[cls]} <strong>(${counts[cls]})</strong>`;
+                legendEl.appendChild(li);
+            }
+            // Add total row
+            const totalLi = document.createElement('li');
+            totalLi.style.gridColumn = '1 / -1';
+            totalLi.style.fontWeight = '700';
+            totalLi.style.marginTop = '0.25rem';
+            totalLi.textContent = `Total: ${total}`;
+            legendEl.appendChild(totalLi);
+        }
     }
 
     // ── 3. Render Bar Chart (Health Trends) ───────────────────
@@ -142,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const percentage = Math.round((trend.count / maxCount) * 100);
             const barHTML = `
                 <div class="bar">
+                    <span class="bar__count">${trend.count}</span>
                     <div class="bar__fill" style="--value: ${percentage}%" title="${trend.count} cases recorded"></div>
                     <span>${safeName}</span>
                 </div>

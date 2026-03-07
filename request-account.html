@@ -54,12 +54,12 @@
                     <input id="create-email" name="email" type="email" placeholder="juandelacruz@yahoo.com" required>
                 </div>
                 <div class="field field--full">
-                    <label for="create-id">Barangay ID:</label>
+                    <label for="create-id">Government ID:</label>
                     <div class="file-upload" id="fileUploadZone">
                         <input id="create-id" name="barangayId" type="file" accept="image/*,.pdf" required class="file-upload__input">
                         <div class="file-upload__placeholder" id="filePlaceholder">
                             <span class="file-upload__icon">&#128196;</span>
-                            <span class="file-upload__text">Click or drag to upload your Barangay ID</span>
+                            <span class="file-upload__text">Click or drag to upload your Government ID</span>
                             <span class="file-upload__hint">JPG, PNG, or PDF (max 5MB)</span>
                         </div>
                         <div class="file-upload__preview" id="filePreview" style="display:none;">
@@ -242,7 +242,7 @@
             const idFile = fileInput.files[0];
 
             if (!idFile) {
-                errorMsg.textContent = 'Please upload your Barangay ID.';
+                errorMsg.textContent = 'Please upload your Government ID.';
                 errorMsg.style.display = 'block';
                 btn.disabled = false;
                 btn.textContent = 'Send Request';
@@ -259,7 +259,7 @@
                     throw new Error('An account request with this email already exists.');
                 }
 
-                // Compress and encode Barangay ID
+                // Compress and encode Government ID
                 btn.textContent = 'Processing ID...';
                 const barangayIdData = await compressImage(idFile);
 
