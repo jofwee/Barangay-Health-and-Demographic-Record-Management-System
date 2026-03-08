@@ -159,6 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p><strong>Gender:</strong> ${escapeHTML(r.sex || '—')}</p>
                 <p><strong>Civil Status:</strong> ${escapeHTML(r.civilStatus || '—')}</p>
                 <p><strong>Blood Type:</strong> ${escapeHTML(r.bloodType || '—')}</p>
+                <p><strong>Place of Birth:</strong> ${escapeHTML(r.placeOfBirth || '—')}</p>
+                <p><strong>Nationality:</strong> ${escapeHTML(r.nationality || 'Filipino')}</p>
+                <p><strong>Occupation:</strong> ${escapeHTML(r.occupation || '—')}</p>
             </div>
 
             <div class="view-section">
@@ -174,11 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <div class="view-section">
-                <h3>Medical Notes</h3>
-                <p>${escapeHTML(r.medicalNotes || r.condition || 'None')}</p>
-                ${r.isPwd ? '<p><strong>PWD:</strong> Yes' + (r.disability ? ' — ' + escapeHTML(r.disability) : '') + '</p>' : ''}
-                ${r.pregnant ? '<p><strong>Pregnant:</strong> Yes</p>' : ''}
-                ${r.isMedication ? `<p><strong>Medication:</strong> ${escapeHTML(r.medicationName || '')} ${r.medicationDosage ? '(' + escapeHTML(r.medicationDosage) + ')' : ''}</p>` : ''}
+                <h3>Medical Information</h3>
+                ${r.isPwd ? '<p><strong>PWD:</strong> Yes' + (r.disability ? ' — ' + escapeHTML(r.disability) : '') + '</p>' : '<p><strong>PWD:</strong> No</p>'}
+                ${r.isMedication ? `<p><strong>Medication:</strong> ${escapeHTML(r.medicationName || '')} ${r.medicationDosage ? '(' + escapeHTML(r.medicationDosage) + ')' : ''} ${r.medicationQty ? 'x' + escapeHTML(String(r.medicationQty)) : ''}</p>
+                <p><strong>Condition:</strong> ${escapeHTML(r.condition || '—')}</p>` : '<p><strong>Medication:</strong> None</p>'}
             </div>
 
             <p class="view-date-added"><strong>Date Added:</strong> ${formatDate(r.createdAt)}</p>
@@ -204,16 +206,76 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-surname').value = r.surname || '';
         document.getElementById('edit-middlename').value = r.middleName || '';
         document.getElementById('edit-suffix').value = r.suffix || '';
-        document.getElementById('edit-birthdate').value = r.dateOfBirth || '';
-        document.getElementById('edit-sex').value = r.sex || 'Male';
+        document.getElementById('edit-sex').value = r.sex || '';
         document.getElementById('edit-contact').value = r.contactNumber || '';
         document.getElementById('edit-email').value = r.email || '';
-        document.getElementById('edit-address').value = r.address || '';
         document.getElementById('edit-bloodtype').value = r.bloodType || '';
         document.getElementById('edit-civil-status').value = r.civilStatus || '';
-        document.getElementById('edit-pwd').checked = !!r.isPwd;
-        document.getElementById('edit-pregnant').checked = !!r.pregnant;
-        document.getElementById('edit-medical-notes').value = r.medicalNotes || '';
+        document.getElementById('edit-occupation').value = r.occupation || '';
+
+        // DOB — parse YYYY-MM-DD into mm / dd / yyyy fields
+        const dob = r.dateOfBirth || '';
+        if (dob) {
+            const parts = dob.split('-');
+            document.getElementById('edit-dob-yyyy').value = parts[0] || '';
+            document.getElementById('edit-dob-mm').value = parseInt(parts[1], 10) || '';
+            document.getElementById('edit-dob-dd').value = parseInt(parts[2], 10) || '';
+        }
+        calcEditAge();
+
+        // Address — try to split "streetNo streetName" or just fill streetName
+        const addr = r.address || '';
+        const addrMatch = addr.match(/^(\S+)\s+(.+)$/);
+        if (addrMatch) {
+            document.getElementById('edit-street-no').value = addrMatch[1];
+            document.getElementById('edit-street-name').value = addrMatch[2];
+        } else {
+            document.getElementById('edit-street-no').value = '';
+            document.getElementById('edit-street-name').value = addr;
+        }
+
+        // Place of birth — split "Province, City"
+        const pob = r.placeOfBirth || '';
+        const pobParts = pob.split(',').map(s => s.trim());
+        document.getElementById('edit-pob-province').value = pobParts[0] || '';
+        document.getElementById('edit-pob-city').value = pobParts[1] || '';
+
+        // Nationality
+        const nat = r.nationality || 'Filipino';
+        const outsidePH = !!r.outsidePH;
+        const editNatInput = document.getElementById('edit-nationality');
+        const editOutsidePH = document.getElementById('edit-outside-ph');
+        editNatInput.value = nat;
+        editOutsidePH.checked = outsidePH;
+        editNatInput.readOnly = !outsidePH;
+
+        // PWD
+        const isPwd = !!r.isPwd;
+        document.querySelector(`input[name="edit-pwd-radio"][value="${isPwd ? 'yes' : 'no'}"]`).checked = true;
+        document.getElementById('editPwdDetailField').style.display = isPwd ? 'flex' : 'none';
+        document.getElementById('edit-disability').value = r.disability || '';
+
+        // Medication
+        const isMed = !!r.isMedication;
+        document.querySelector(`input[name="edit-med-radio"][value="${isMed ? 'yes' : 'no'}"]`).checked = true;
+        document.getElementById('editMedicationDetails').style.display = isMed ? 'flex' : 'none';
+        document.getElementById('edit-med-name').value = r.medicationName || '';
+        document.getElementById('edit-med-dosage').value = r.medicationDosage || '';
+        document.getElementById('edit-med-qty').value = r.medicationQty || '';
+
+        // Condition
+        const cond = r.condition || '';
+        const condSelect = document.getElementById('edit-condition');
+        const condOtherField = document.getElementById('editConditionOtherField');
+        const knownConditions = [...condSelect.options].map(o => o.value).filter(Boolean);
+        if (knownConditions.includes(cond)) {
+            condSelect.value = cond;
+            condOtherField.style.display = 'none';
+        } else if (cond) {
+            condSelect.value = 'Other';
+            document.getElementById('edit-condition-other').value = cond;
+            condOtherField.style.display = 'flex';
+        }
 
         editModal.style.display = 'flex';
     };
@@ -221,8 +283,79 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeEditModal = function() {
         editModal.style.display = 'none';
         editForm.reset();
+        document.getElementById('editPwdDetailField').style.display = 'none';
+        document.getElementById('editMedicationDetails').style.display = 'none';
+        document.getElementById('editConditionOtherField').style.display = 'none';
+        const editNat = document.getElementById('edit-nationality');
+        editNat.value = 'Filipino'; editNat.readOnly = true;
     };
     if (editModal) editModal.addEventListener('click', e => { if (e.target === editModal) closeEditModal(); });
+
+    // ── Edit modal: Auto-calculate age from DOB ──
+    const editDobMM = document.getElementById('edit-dob-mm');
+    const editDobDD = document.getElementById('edit-dob-dd');
+    const editDobYYYY = document.getElementById('edit-dob-yyyy');
+    const editAgeInput = document.getElementById('edit-age');
+
+    function calcEditAge() {
+        const mm = parseInt(editDobMM?.value, 10);
+        const dd = parseInt(editDobDD?.value, 10);
+        const yyyy = parseInt(editDobYYYY?.value, 10);
+        if (!mm || !dd || !yyyy || yyyy < 1900) { if (editAgeInput) editAgeInput.value = ''; return; }
+        const today = new Date();
+        const birth = new Date(yyyy, mm - 1, dd);
+        if (isNaN(birth.getTime())) { editAgeInput.value = ''; return; }
+        let age = today.getFullYear() - birth.getFullYear();
+        const mDiff = today.getMonth() - birth.getMonth();
+        if (mDiff < 0 || (mDiff === 0 && today.getDate() < birth.getDate())) age--;
+        editAgeInput.value = age >= 0 ? age : '';
+    }
+    if (editDobMM && editDobDD && editDobYYYY) {
+        editDobMM.addEventListener('input', calcEditAge);
+        editDobDD.addEventListener('input', calcEditAge);
+        editDobYYYY.addEventListener('input', calcEditAge);
+    }
+
+    // ── Edit modal: PWD toggle ──
+    const editPwdRadios = document.querySelectorAll('input[name="edit-pwd-radio"]');
+    const editPwdDetailField = document.getElementById('editPwdDetailField');
+    editPwdRadios.forEach(r => r.addEventListener('change', () => {
+        editPwdDetailField.style.display = r.value === 'yes' && r.checked ? 'flex' : 'none';
+    }));
+
+    // ── Edit modal: Medication toggle ──
+    const editMedRadios = document.querySelectorAll('input[name="edit-med-radio"]');
+    const editMedicationDetails = document.getElementById('editMedicationDetails');
+    editMedRadios.forEach(r => r.addEventListener('change', () => {
+        editMedicationDetails.style.display = r.value === 'yes' && r.checked ? 'flex' : 'none';
+    }));
+
+    // ── Edit modal: Condition "Other" toggle ──
+    const editConditionSelect = document.getElementById('edit-condition');
+    const editConditionOtherField = document.getElementById('editConditionOtherField');
+    if (editConditionSelect) {
+        editConditionSelect.addEventListener('change', () => {
+            editConditionOtherField.style.display = editConditionSelect.value === 'Other' ? 'flex' : 'none';
+        });
+    }
+
+    // ── Edit modal: Outside PH toggle ──
+    const editOutsidePH = document.getElementById('edit-outside-ph');
+    const editNationalityInput = document.getElementById('edit-nationality');
+    if (editOutsidePH && editNationalityInput) {
+        editOutsidePH.addEventListener('change', () => {
+            if (editOutsidePH.checked) {
+                editNationalityInput.readOnly = false;
+                editNationalityInput.value = '';
+                editNationalityInput.placeholder = 'Enter nationality';
+                editNationalityInput.focus();
+            } else {
+                editNationalityInput.readOnly = true;
+                editNationalityInput.value = 'Filipino';
+                editNationalityInput.placeholder = '';
+            }
+        });
+    }
 
     if (editForm) {
         editForm.addEventListener('submit', async (e) => {
@@ -232,27 +365,79 @@ document.addEventListener('DOMContentLoaded', () => {
             saveBtn.textContent = 'Saving...';
 
             const docId = document.getElementById('edit-doc-id').value;
-            const birthdate = document.getElementById('edit-birthdate').value;
-            const age = calcAgeFromDate(birthdate);
-            const isPwd = document.getElementById('edit-pwd').checked;
+
+            // Personal info
+            const surname = document.getElementById('edit-surname').value.trim();
+            const firstname = document.getElementById('edit-firstname').value.trim();
+            const middlename = document.getElementById('edit-middlename').value.trim();
+            const suffix = document.getElementById('edit-suffix').value;
+            const sex = document.getElementById('edit-sex').value;
+            const civilStatus = document.getElementById('edit-civil-status').value;
+            const bloodType = document.getElementById('edit-bloodtype').value;
+            const occupation = (document.getElementById('edit-occupation')?.value || '').trim();
+            const streetNo = (document.getElementById('edit-street-no')?.value || '').trim();
+            const streetName = (document.getElementById('edit-street-name')?.value || '').trim();
+            const address = [streetNo, streetName].filter(Boolean).join(' ');
+            const contact = document.getElementById('edit-contact').value.trim();
+            const email = document.getElementById('edit-email').value.trim();
+            const pobProvince = (document.getElementById('edit-pob-province')?.value || '').trim();
+            const pobCity = (document.getElementById('edit-pob-city')?.value || '').trim();
+            const placeOfBirth = [pobProvince, pobCity].filter(Boolean).join(', ');
+            const nationality = (document.getElementById('edit-nationality')?.value || 'Filipino').trim();
+            const outsidePH = document.getElementById('edit-outside-ph')?.checked || false;
+
+            // DOB
+            const mm = editDobMM ? editDobMM.value.trim() : '';
+            const dd = editDobDD ? editDobDD.value.trim() : '';
+            const yyyy = editDobYYYY ? editDobYYYY.value.trim() : '';
+            const dateOfBirth = (mm && dd && yyyy) ? `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}` : '';
+            const age = editAgeInput ? parseInt(editAgeInput.value, 10) : null;
+
+            // Medical
+            const isPwd = document.querySelector('input[name="edit-pwd-radio"]:checked')?.value === 'yes';
+            const disability = isPwd ? (document.getElementById('edit-disability')?.value.trim() || '') : '';
+            const isMedication = document.querySelector('input[name="edit-med-radio"]:checked')?.value === 'yes';
+            const medName = isMedication ? (document.getElementById('edit-med-name')?.value.trim() || '') : '';
+            const medDosage = isMedication ? (document.getElementById('edit-med-dosage')?.value.trim() || '') : '';
+            const medQty = isMedication ? (document.getElementById('edit-med-qty')?.value.trim() || '') : '';
+            const conditionVal = isMedication ? (document.getElementById('edit-condition')?.value || '') : '';
+            const conditionOther = isMedication ? (document.getElementById('edit-condition-other')?.value.trim() || '') : '';
+            const condition = conditionVal === 'Other' ? conditionOther : conditionVal;
+
+            if (!surname || !firstname || isNaN(age) || age === null || !sex || !address) {
+                alert('Please fill in all required fields (Surname, First Name, Date of Birth, Sex, Address).');
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'SAVE CHANGES';
+                return;
+            }
+
+            const classification = getClassification(age, isPwd);
 
             const updatedData = {
-                firstName: document.getElementById('edit-firstname').value.trim(),
-                surname: document.getElementById('edit-surname').value.trim(),
-                middleName: document.getElementById('edit-middlename').value.trim(),
-                suffix: document.getElementById('edit-suffix').value,
-                dateOfBirth: birthdate,
-                age: age !== null ? age : 0,
-                sex: document.getElementById('edit-sex').value,
-                contactNumber: document.getElementById('edit-contact').value.trim(),
-                email: document.getElementById('edit-email').value.trim(),
-                address: document.getElementById('edit-address').value.trim(),
-                bloodType: document.getElementById('edit-bloodtype').value,
-                civilStatus: document.getElementById('edit-civil-status').value,
-                isPwd: isPwd,
-                pregnant: document.getElementById('edit-pregnant').checked,
-                medicalNotes: document.getElementById('edit-medical-notes').value.trim(),
-                classification: getClassification(age, isPwd),
+                surname,
+                suffix,
+                firstName: firstname,
+                middleName: middlename,
+                dateOfBirth,
+                placeOfBirth,
+                nationality,
+                outsidePH,
+                age,
+                sex,
+                civilStatus,
+                bloodType,
+                occupation,
+                address,
+                contactNumber: contact,
+                email,
+                isPwd,
+                disability,
+                isMedication,
+                medicationName: medName,
+                medicationDosage: medDosage,
+                medicationQty: medQty,
+                condition,
+                classification,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
@@ -261,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (auth.currentUser) {
                     await db.collection('activityLogs').add({
                         userEmail: auth.currentUser.email,
-                        action: `Edited resident: ${updatedData.firstName} ${updatedData.surname}`,
+                        action: `Edited resident: ${firstname} ${surname}`,
                         location: 'Residents\' Management',
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
@@ -273,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Error updating record: ' + error.message);
             } finally {
                 saveBtn.disabled = false;
-                saveBtn.textContent = 'Save Changes';
+                saveBtn.textContent = 'SAVE CHANGES';
             }
         });
     }
@@ -347,6 +532,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ══════════════════════════════════════════════════════
     window.openAddResidentModal = function() {
         if (addForm) addForm.reset();
+        // Reset hidden sections
+        const addPwdDetail = document.getElementById('addPwdDetailField');
+        const addMedDetails = document.getElementById('addMedicationDetails');
+        const addCondOther = document.getElementById('addConditionOtherField');
+        const addNationality = document.getElementById('add-nationality');
+        if (addPwdDetail) addPwdDetail.style.display = 'none';
+        if (addMedDetails) addMedDetails.style.display = 'none';
+        if (addCondOther) addCondOther.style.display = 'none';
+        if (addNationality) { addNationality.value = 'Filipino'; addNationality.readOnly = true; }
         if (addModal) addModal.style.display = 'flex';
     };
 
@@ -356,61 +550,153 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     if (addModal) addModal.addEventListener('click', e => { if (e.target === addModal) closeAddResidentModal(); });
 
+    // ── Add modal: Auto-calculate age from DOB ──
+    const addDobMM = document.getElementById('add-dob-mm');
+    const addDobDD = document.getElementById('add-dob-dd');
+    const addDobYYYY = document.getElementById('add-dob-yyyy');
+    const addAgeInput = document.getElementById('add-age');
+
+    function calcAddAge() {
+        const mm = parseInt(addDobMM.value, 10);
+        const dd = parseInt(addDobDD.value, 10);
+        const yyyy = parseInt(addDobYYYY.value, 10);
+        if (!mm || !dd || !yyyy || yyyy < 1900) { addAgeInput.value = ''; return; }
+        const today = new Date();
+        const birth = new Date(yyyy, mm - 1, dd);
+        if (isNaN(birth.getTime())) { addAgeInput.value = ''; return; }
+        let age = today.getFullYear() - birth.getFullYear();
+        const mDiff = today.getMonth() - birth.getMonth();
+        if (mDiff < 0 || (mDiff === 0 && today.getDate() < birth.getDate())) age--;
+        addAgeInput.value = age >= 0 ? age : '';
+    }
+    if (addDobMM && addDobDD && addDobYYYY) {
+        addDobMM.addEventListener('input', calcAddAge);
+        addDobDD.addEventListener('input', calcAddAge);
+        addDobYYYY.addEventListener('input', calcAddAge);
+    }
+
+    // ── Add modal: PWD toggle ──
+    const addPwdRadios = document.querySelectorAll('input[name="add-pwd-radio"]');
+    const addPwdDetailField = document.getElementById('addPwdDetailField');
+    addPwdRadios.forEach(r => r.addEventListener('change', () => {
+        addPwdDetailField.style.display = r.value === 'yes' && r.checked ? 'flex' : 'none';
+    }));
+
+    // ── Add modal: Medication toggle ──
+    const addMedRadios = document.querySelectorAll('input[name="add-med-radio"]');
+    const addMedicationDetails = document.getElementById('addMedicationDetails');
+    addMedRadios.forEach(r => r.addEventListener('change', () => {
+        addMedicationDetails.style.display = r.value === 'yes' && r.checked ? 'flex' : 'none';
+    }));
+
+    // ── Add modal: Condition "Other" toggle ──
+    const addConditionSelect = document.getElementById('add-condition');
+    const addConditionOtherField = document.getElementById('addConditionOtherField');
+    if (addConditionSelect) {
+        addConditionSelect.addEventListener('change', () => {
+            addConditionOtherField.style.display = addConditionSelect.value === 'Other' ? 'flex' : 'none';
+        });
+    }
+
+    // ── Add modal: Outside PH toggle ──
+    const addOutsidePH = document.getElementById('add-outside-ph');
+    const addNationalityInput = document.getElementById('add-nationality');
+    if (addOutsidePH && addNationalityInput) {
+        addOutsidePH.addEventListener('change', () => {
+            if (addOutsidePH.checked) {
+                addNationalityInput.readOnly = false;
+                addNationalityInput.value = '';
+                addNationalityInput.placeholder = 'Enter nationality';
+                addNationalityInput.focus();
+            } else {
+                addNationalityInput.readOnly = true;
+                addNationalityInput.value = 'Filipino';
+                addNationalityInput.placeholder = '';
+            }
+        });
+    }
+
     if (addForm) {
         addForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('addResidentBtn');
             btn.disabled = true;
-            btn.textContent = 'Registering...';
+            btn.textContent = 'Submitting...';
 
-            const firstname = document.getElementById('add-firstname').value.trim();
+            // Personal info
             const surname = document.getElementById('add-surname').value.trim();
+            const firstname = document.getElementById('add-firstname').value.trim();
             const middlename = document.getElementById('add-middlename').value.trim();
             const suffix = document.getElementById('add-suffix').value;
-            const birthdate = document.getElementById('add-birthdate').value;
             const sex = document.getElementById('add-sex').value;
+            const civilStatus = document.getElementById('add-civil-status').value;
+            const bloodType = document.getElementById('add-bloodtype').value;
+            const occupation = (document.getElementById('add-occupation')?.value || '').trim();
+            const streetNo = (document.getElementById('add-street-no')?.value || '').trim();
+            const streetName = (document.getElementById('add-street-name')?.value || '').trim();
+            const address = [streetNo, streetName].filter(Boolean).join(' ');
             const contact = document.getElementById('add-contact').value.trim();
             const email = document.getElementById('add-email').value.trim();
-            const address = document.getElementById('add-address').value.trim();
-            const bloodType = document.getElementById('add-bloodtype').value;
-            const civilStatus = document.getElementById('add-civil-status').value;
-            const isPwd = document.getElementById('add-pwd').checked;
-            const pregnant = document.getElementById('add-pregnant').checked;
-            const medicalNotes = document.getElementById('add-medical-notes').value.trim();
-            const age = calcAgeFromDate(birthdate);
+            const pobProvince = (document.getElementById('add-pob-province')?.value || '').trim();
+            const pobCity = (document.getElementById('add-pob-city')?.value || '').trim();
+            const placeOfBirth = [pobProvince, pobCity].filter(Boolean).join(', ');
+            const nationality = (document.getElementById('add-nationality')?.value || 'Filipino').trim();
+            const outsidePH = document.getElementById('add-outside-ph')?.checked || false;
 
-            if (age === null) {
-                alert('Please enter a valid birthdate.');
+            // DOB
+            const mm = addDobMM ? addDobMM.value.trim() : '';
+            const dd = addDobDD ? addDobDD.value.trim() : '';
+            const yyyy = addDobYYYY ? addDobYYYY.value.trim() : '';
+            const dateOfBirth = (mm && dd && yyyy) ? `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}` : '';
+            const age = addAgeInput ? parseInt(addAgeInput.value, 10) : null;
+
+            // Medical
+            const isPwd = document.querySelector('input[name="add-pwd-radio"]:checked')?.value === 'yes';
+            const disability = isPwd ? (document.getElementById('add-disability')?.value.trim() || '') : '';
+            const isMedication = document.querySelector('input[name="add-med-radio"]:checked')?.value === 'yes';
+            const medName = isMedication ? (document.getElementById('add-med-name')?.value.trim() || '') : '';
+            const medDosage = isMedication ? (document.getElementById('add-med-dosage')?.value.trim() || '') : '';
+            const medQty = isMedication ? (document.getElementById('add-med-qty')?.value.trim() || '') : '';
+            const conditionVal = isMedication ? (document.getElementById('add-condition')?.value || '') : '';
+            const conditionOther = isMedication ? (document.getElementById('add-condition-other')?.value.trim() || '') : '';
+            const condition = conditionVal === 'Other' ? conditionOther : conditionVal;
+
+            // Validation
+            if (!surname || !firstname || isNaN(age) || age === null || !sex || !address) {
+                alert('Please fill in all required fields (Surname, First Name, Date of Birth, Sex, Address).');
                 btn.disabled = false;
-                btn.textContent = 'Register Resident';
+                btn.textContent = 'DONE';
                 return;
             }
 
             const classification = getClassification(age, isPwd);
 
-            // Generate Health ID
-            const initials = (firstname.charAt(0) + surname.charAt(0)).toUpperCase();
-            const yearSuffix = new Date().getFullYear().toString().slice(-2);
-            let healthId = `B86${initials}${age}${yearSuffix}`;
+            // Generate Health ID (B86 + 6 random uppercase letters)
+            function randomLetters(n) {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                let result = '';
+                for (let i = 0; i < n; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+                return result;
+            }
+            let healthId = `B86${randomLetters(6)}`;
 
             try {
                 let isUnique = false;
                 let attempts = 0;
-                while (!isUnique && attempts < 5) {
+                while (!isUnique && attempts < 10) {
                     const existing = await db.collection('residents')
                         .where('healthId', '==', healthId).limit(1).get();
                     if (existing.empty) {
                         isUnique = true;
                     } else {
-                        const rnd = Math.floor(Math.random() * 900 + 100);
-                        healthId = `B86${initials}${age}${yearSuffix}${rnd}`;
+                        healthId = `B86${randomLetters(6)}`;
                         attempts++;
                     }
                 }
                 if (!isUnique) {
                     alert('Could not generate a unique Health ID. Please try again.');
                     btn.disabled = false;
-                    btn.textContent = 'Register Resident';
+                    btn.textContent = 'DONE';
                     return;
                 }
 
@@ -420,17 +706,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     suffix,
                     firstName: firstname,
                     middleName: middlename,
-                    dateOfBirth: birthdate,
+                    dateOfBirth,
+                    placeOfBirth,
+                    nationality,
+                    outsidePH,
                     age,
                     sex,
+                    civilStatus,
+                    bloodType,
+                    occupation,
                     address,
                     contactNumber: contact,
                     email,
-                    bloodType,
-                    civilStatus,
                     isPwd,
-                    pregnant,
-                    medicalNotes,
+                    disability,
+                    isMedication,
+                    medicationName: medName,
+                    medicationDosage: medDosage,
+                    medicationQty: medQty,
+                    condition,
                     classification,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     createdBy: auth.currentUser ? auth.currentUser.email : 'Unknown Staff'
@@ -445,6 +739,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
+                // Auto-create maintenance log if on medication
+                if (isMedication && medName) {
+                    const medQtyNum = parseInt(medQty, 10) || 0;
+                    const residentFullName = [firstname, surname].filter(Boolean).join(' ');
+                    const today = new Date();
+                    const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+                    const logData = {
+                        date: dateStr,
+                        residentName: residentFullName,
+                        healthId: healthId,
+                        indication: condition || 'N/A',
+                        medicineName: medName,
+                        quantity: medQtyNum,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    try {
+                        const medSnap = await db.collection('medicines').get();
+                        const medDoc = medSnap.docs.find(d => (d.data().name || '').toLowerCase() === medName.toLowerCase());
+
+                        if (medDoc && medDoc.data().quantity >= medQtyNum) {
+                            const batch = db.batch();
+                            batch.update(db.collection('medicines').doc(medDoc.id), {
+                                quantity: firebase.firestore.FieldValue.increment(-medQtyNum)
+                            });
+                            batch.set(db.collection('maintenanceLogs').doc(), logData);
+                            await batch.commit();
+                        } else if (medDoc) {
+                            alert(`Insufficient stock for ${medName}. Available: ${medDoc.data().quantity}, Needed: ${medQtyNum}. Maintenance log was not created.`);
+                        } else {
+                            alert(`Medicine "${medName}" not found in inventory. Maintenance log was not created.`);
+                        }
+                    } catch (logErr) {
+                        console.warn('Could not create maintenance log:', logErr);
+                    }
+                }
+
                 closeAddResidentModal();
                 loadResidents();
                 alert(`Resident registered successfully!\nHealth ID: ${healthId}`);
@@ -453,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Error saving record: ' + error.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Register Resident';
+                btn.textContent = 'DONE';
             }
         });
     }

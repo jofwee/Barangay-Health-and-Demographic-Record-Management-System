@@ -165,7 +165,7 @@
                     </div>
                     <div style="flex:1;">
                         <label class="modal-label" for="log-healthid">Health ID</label>
-                        <input type="text" id="log-healthid" class="modal-select" placeholder="e.g. B86PK1B25" required>
+                        <input type="text" id="log-healthid" class="modal-select" placeholder="e.g. B86ABCDEF" required>
                     </div>
                 </div>
 
@@ -175,7 +175,9 @@
                 <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
                     <div style="flex:2;">
                         <label class="modal-label" for="log-medname">Medicine Name</label>
-                        <input type="text" id="log-medname" class="modal-select" placeholder="e.g. Ceterizine" required>
+                        <select id="log-medname" class="modal-select" required>
+                            <option value="" disabled selected>Select medicine...</option>
+                        </select>
                     </div>
                     <div style="flex:1;">
                         <label class="modal-label" for="log-qty">Quantity</label>

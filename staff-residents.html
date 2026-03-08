@@ -182,34 +182,34 @@
 
     <!-- ═══ Edit Resident Modal ═══ -->
     <div id="editResidentModal" class="modal-overlay" style="display:none;">
-        <div class="modal resident-modal">
+        <div class="modal resident-modal resident-modal--wide">
             <div class="resident-modal__header">
                 <h2>Edit Resident</h2>
                 <button class="resident-modal__close" onclick="closeEditModal()">&times;</button>
             </div>
-            <form id="editResidentForm" class="resident-modal__form">
+            <form id="editResidentForm" class="resident-modal__form rbi-form">
                 <input type="hidden" id="edit-doc-id">
 
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="edit-firstname">First Name <span class="rm-req">*</span></label>
-                        <input type="text" id="edit-firstname" required>
-                    </div>
-                    <div class="rm-field">
-                        <label for="edit-surname">Last Name <span class="rm-req">*</span></label>
-                        <input type="text" id="edit-surname" required>
-                    </div>
-                </div>
+                <!-- ═══ I. PERSONAL INFORMATION ═══ -->
+                <h3 class="rbi-section-heading">I. PERSONAL INFORMATION</h3>
 
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="edit-middlename">Middle Name</label>
-                        <input type="text" id="edit-middlename">
+                <div class="rbi-row rbi-row--4col">
+                    <div class="rbi-field">
+                        <label for="edit-surname">Surname:</label>
+                        <input id="edit-surname" type="text" placeholder="Type..." required>
                     </div>
-                    <div class="rm-field rm-field--small">
-                        <label for="edit-suffix">Suffix</label>
+                    <div class="rbi-field">
+                        <label for="edit-firstname">First Name:</label>
+                        <input id="edit-firstname" type="text" placeholder="Type..." required>
+                    </div>
+                    <div class="rbi-field">
+                        <label for="edit-middlename">Middle Name:</label>
+                        <input id="edit-middlename" type="text" placeholder="Type...">
+                    </div>
+                    <div class="rbi-field rbi-field--small">
+                        <label for="edit-suffix">Suffix:</label>
                         <select id="edit-suffix">
-                            <option value="">None</option>
+                            <option value="" selected>None</option>
                             <option value="Jr.">Jr.</option>
                             <option value="Sr.">Sr.</option>
                             <option value="II">II</option>
@@ -220,41 +220,65 @@
                     </div>
                 </div>
 
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="edit-birthdate">Birthdate <span class="rm-req">*</span></label>
-                        <input type="date" id="edit-birthdate" required>
+                <div class="rbi-row rbi-row--dob">
+                    <div class="rbi-field">
+                        <label>Date of Birth:</label>
+                        <div class="rbi-dob-group">
+                            <input id="edit-dob-mm" type="number" min="1" max="12" placeholder="mm">
+                            <input id="edit-dob-dd" type="number" min="1" max="31" placeholder="dd">
+                            <input id="edit-dob-yyyy" type="number" min="1900" max="2030" placeholder="yyyy">
+                        </div>
                     </div>
-                    <div class="rm-field">
-                        <label for="edit-sex">Gender <span class="rm-req">*</span></label>
+                    <div class="rbi-field rbi-field--small">
+                        <label for="edit-age">Age:</label>
+                        <input id="edit-age" type="number" min="0" max="150" placeholder="auto" readonly>
+                    </div>
+                </div>
+
+                <div class="rbi-row">
+                    <div class="rbi-field">
+                        <label>Place of Birth:</label>
+                        <div class="rbi-pob-group">
+                            <input id="edit-pob-province" type="text" placeholder="Province">
+                            <input id="edit-pob-city" type="text" placeholder="City">
+                        </div>
+                    </div>
+                    <div class="rbi-field">
+                        <label for="edit-nationality">Nationality:</label>
+                        <input id="edit-nationality" type="text" value="Filipino" readonly>
+                    </div>
+                </div>
+
+                <div class="rbi-row rbi-row--checkbox-row">
+                    <label class="rbi-checkbox-label">
+                        <input id="edit-outside-ph" type="checkbox">
+                        Outside the Philippines
+                    </label>
+                </div>
+
+                <div class="rbi-row">
+                    <div class="rbi-field">
+                        <label for="edit-sex">Sex:</label>
                         <select id="edit-sex" required>
+                            <option value="" disabled selected>Select...</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="edit-contact">Contact Number</label>
-                        <input type="text" id="edit-contact" placeholder="09xxxxxxxxx">
+                    <div class="rbi-field">
+                        <label for="edit-civil-status">Civil Status:</label>
+                        <select id="edit-civil-status">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                            <option value="Separated">Separated</option>
+                        </select>
                     </div>
-                    <div class="rm-field">
-                        <label for="edit-email">Email</label>
-                        <input type="email" id="edit-email" placeholder="email@example.com">
-                    </div>
-                </div>
-
-                <div class="rm-field rm-field--full">
-                    <label for="edit-address">Address <span class="rm-req">*</span></label>
-                    <input type="text" id="edit-address" required>
-                </div>
-
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="edit-bloodtype">Blood Type</label>
+                    <div class="rbi-field">
+                        <label for="edit-bloodtype">Blood Type:</label>
                         <select id="edit-bloodtype">
-                            <option value="">Unknown</option>
+                            <option value="" disabled selected>Select...</option>
                             <option value="A+">A+</option>
                             <option value="A-">A-</option>
                             <option value="B+">B+</option>
@@ -265,36 +289,103 @@
                             <option value="AB-">AB-</option>
                         </select>
                     </div>
-                    <div class="rm-field">
-                        <label for="edit-civil-status">Civil Status</label>
-                        <select id="edit-civil-status">
-                            <option value="">—</option>
-                            <option value="Single">Single</option>
-                            <option value="Married">Married</option>
-                            <option value="Widowed">Widowed</option>
-                            <option value="Separated">Separated</option>
-                        </select>
+                </div>
+
+                <div class="rbi-field rbi-field--full">
+                    <label for="edit-occupation">Occupation:</label>
+                    <input id="edit-occupation" type="text" placeholder="Type...">
+                </div>
+
+                <div class="rbi-field rbi-field--full">
+                    <label>Residence Address:</label>
+                    <div class="rbi-address-group">
+                        <input id="edit-street-no" type="text" placeholder="Street No.">
+                        <input id="edit-street-name" type="text" placeholder="Street Name">
                     </div>
                 </div>
 
-                <div class="rm-row">
-                    <div class="rm-field rm-field--checkbox">
-                        <input type="checkbox" id="edit-pwd">
-                        <label for="edit-pwd">Person with Disability (PWD)</label>
+                <div class="rbi-row">
+                    <div class="rbi-field">
+                        <label for="edit-contact">Contact Number:</label>
+                        <input id="edit-contact" type="text" placeholder="XXXXXXXXXX">
                     </div>
-                    <div class="rm-field rm-field--checkbox">
-                        <input type="checkbox" id="edit-pregnant">
-                        <label for="edit-pregnant">Pregnant</label>
+                    <div class="rbi-field">
+                        <label for="edit-email">E-mail Address:</label>
+                        <input id="edit-email" type="email" placeholder="sample@yahoo.com">
                     </div>
                 </div>
 
-                <div class="rm-field rm-field--full">
-                    <label for="edit-medical-notes">Medical Notes</label>
-                    <textarea id="edit-medical-notes" rows="3" placeholder="None"></textarea>
+                <!-- ═══ II. MEDICAL INFORMATION ═══ -->
+                <h3 class="rbi-section-heading">II. MEDICAL INFORMATION</h3>
+
+                <div class="rbi-row rbi-row--medical-toggles">
+                    <div class="rbi-toggle-group">
+                        <label class="rbi-toggle-label">Are you a Person with Disability (PWD)?</label>
+                        <div class="rbi-radio-pair">
+                            <label><input type="radio" name="edit-pwd-radio" value="yes"> Yes</label>
+                            <label><input type="radio" name="edit-pwd-radio" value="no" checked> No</label>
+                        </div>
+                        <div class="rbi-field rbi-pwd-detail" id="editPwdDetailField" style="display:none;">
+                            <label for="edit-disability">Disability</label>
+                            <input id="edit-disability" type="text" placeholder="________________">
+                        </div>
+                    </div>
+                    <div class="rbi-toggle-group">
+                        <label class="rbi-toggle-label">Are you taking any medications or maintenance?</label>
+                        <div class="rbi-radio-pair">
+                            <label><input type="radio" name="edit-med-radio" value="yes"> Yes</label>
+                            <label><input type="radio" name="edit-med-radio" value="no" checked> No</label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="rm-actions">
-                    <button type="submit" class="rm-btn rm-btn--save" id="saveEditBtn">Save Changes</button>
+                <!-- Medication details (hidden by default) -->
+                <div class="rbi-medication-details" id="editMedicationDetails" style="display:none;">
+                    <div class="rbi-row rbi-row--3col">
+                        <div class="rbi-field">
+                            <label for="edit-med-name">Name of Medication:</label>
+                            <input id="edit-med-name" type="text" placeholder="Type">
+                        </div>
+                        <div class="rbi-field">
+                            <label for="edit-med-dosage">Dosage:</label>
+                            <input id="edit-med-dosage" type="text" placeholder="Type">
+                        </div>
+                        <div class="rbi-field rbi-field--small">
+                            <label for="edit-med-qty">Qty:</label>
+                            <input id="edit-med-qty" type="text" placeholder="Type">
+                        </div>
+                    </div>
+                    <div class="rbi-row">
+                        <div class="rbi-field">
+                            <label for="edit-condition">Condition:</label>
+                            <select id="edit-condition">
+                                <option value="" disabled selected>Select...</option>
+                                <option value="Hypertension">Hypertension</option>
+                                <option value="Diabetes">Diabetes</option>
+                                <option value="Asthma">Asthma</option>
+                                <option value="Tuberculosis">Tuberculosis</option>
+                                <option value="Heart Disease">Heart Disease</option>
+                                <option value="Kidney Disease">Kidney Disease</option>
+                                <option value="Arthritis">Arthritis</option>
+                                <option value="Thyroid Disorder">Thyroid Disorder</option>
+                                <option value="Cancer">Cancer</option>
+                                <option value="Epilepsy">Epilepsy</option>
+                                <option value="Anemia">Anemia</option>
+                                <option value="UTI">UTI</option>
+                                <option value="Pneumonia">Pneumonia</option>
+                                <option value="Dengue">Dengue</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="rbi-field" id="editConditionOtherField" style="display:none;">
+                            <label for="edit-condition-other">Others, please specify</label>
+                            <input id="edit-condition-other" type="text" placeholder="Others, please specify">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rbi-actions">
+                    <button class="submit-btn" type="submit" id="saveEditBtn">SAVE CHANGES</button>
                     <button type="button" class="rm-btn rm-btn--cancel" onclick="closeEditModal()">Cancel</button>
                 </div>
             </form>
@@ -322,32 +413,32 @@
 
     <!-- ═══ Add New Resident Modal ═══ -->
     <div id="addResidentModal" class="modal-overlay" style="display:none;">
-        <div class="modal resident-modal">
+        <div class="modal resident-modal resident-modal--wide">
             <div class="resident-modal__header">
                 <h2>Add New Resident</h2>
                 <button class="resident-modal__close" onclick="closeAddResidentModal()">&times;</button>
             </div>
-            <form id="addResidentForm" class="resident-modal__form">
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="add-firstname">First Name <span class="rm-req">*</span></label>
-                        <input type="text" id="add-firstname" placeholder="Juan" required>
-                    </div>
-                    <div class="rm-field">
-                        <label for="add-surname">Last Name <span class="rm-req">*</span></label>
-                        <input type="text" id="add-surname" placeholder="Dela Cruz" required>
-                    </div>
-                </div>
+            <form id="addResidentForm" class="resident-modal__form rbi-form">
+                <!-- ═══ I. PERSONAL INFORMATION ═══ -->
+                <h3 class="rbi-section-heading">I. PERSONAL INFORMATION</h3>
 
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="add-middlename">Middle Name</label>
-                        <input type="text" id="add-middlename" placeholder="Santos">
+                <div class="rbi-row rbi-row--4col">
+                    <div class="rbi-field">
+                        <label for="add-surname">Surname:</label>
+                        <input id="add-surname" type="text" placeholder="Type..." required>
                     </div>
-                    <div class="rm-field rm-field--small">
-                        <label for="add-suffix">Suffix</label>
+                    <div class="rbi-field">
+                        <label for="add-firstname">First Name:</label>
+                        <input id="add-firstname" type="text" placeholder="Type..." required>
+                    </div>
+                    <div class="rbi-field">
+                        <label for="add-middlename">Middle Name:</label>
+                        <input id="add-middlename" type="text" placeholder="Type...">
+                    </div>
+                    <div class="rbi-field rbi-field--small">
+                        <label for="add-suffix">Suffix:</label>
                         <select id="add-suffix">
-                            <option value="">None</option>
+                            <option value="" selected>Select</option>
                             <option value="Jr.">Jr.</option>
                             <option value="Sr.">Sr.</option>
                             <option value="II">II</option>
@@ -358,42 +449,65 @@
                     </div>
                 </div>
 
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="add-birthdate">Birthdate <span class="rm-req">*</span></label>
-                        <input type="date" id="add-birthdate" required>
+                <div class="rbi-row rbi-row--dob">
+                    <div class="rbi-field">
+                        <label>Date of Birth:</label>
+                        <div class="rbi-dob-group">
+                            <input id="add-dob-mm" type="number" min="1" max="12" placeholder="mm">
+                            <input id="add-dob-dd" type="number" min="1" max="31" placeholder="dd">
+                            <input id="add-dob-yyyy" type="number" min="1900" max="2030" placeholder="yyyy">
+                        </div>
                     </div>
-                    <div class="rm-field">
-                        <label for="add-sex">Gender <span class="rm-req">*</span></label>
+                    <div class="rbi-field rbi-field--small">
+                        <label for="add-age">Age:</label>
+                        <input id="add-age" type="number" min="0" max="150" placeholder="auto" readonly>
+                    </div>
+                </div>
+
+                <div class="rbi-row">
+                    <div class="rbi-field">
+                        <label>Place of Birth:</label>
+                        <div class="rbi-pob-group">
+                            <input id="add-pob-province" type="text" placeholder="Province">
+                            <input id="add-pob-city" type="text" placeholder="City">
+                        </div>
+                    </div>
+                    <div class="rbi-field">
+                        <label for="add-nationality">Nationality:</label>
+                        <input id="add-nationality" type="text" value="Filipino" readonly>
+                    </div>
+                </div>
+
+                <div class="rbi-row rbi-row--checkbox-row">
+                    <label class="rbi-checkbox-label">
+                        <input id="add-outside-ph" type="checkbox">
+                        Outside the Philippines
+                    </label>
+                </div>
+
+                <div class="rbi-row">
+                    <div class="rbi-field">
+                        <label for="add-sex">Sex:</label>
                         <select id="add-sex" required>
                             <option value="" disabled selected>Select...</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="add-contact">Contact Number</label>
-                        <input type="text" id="add-contact" placeholder="09xxxxxxxxx">
+                    <div class="rbi-field">
+                        <label for="add-civil-status">Civil Status:</label>
+                        <select id="add-civil-status">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                            <option value="Separated">Separated</option>
+                        </select>
                     </div>
-                    <div class="rm-field">
-                        <label for="add-email">Email</label>
-                        <input type="email" id="add-email" placeholder="email@example.com">
-                    </div>
-                </div>
-
-                <div class="rm-field rm-field--full">
-                    <label for="add-address">Address <span class="rm-req">*</span></label>
-                    <input type="text" id="add-address" placeholder="Street, Barangay, City" required>
-                </div>
-
-                <div class="rm-row">
-                    <div class="rm-field">
-                        <label for="add-bloodtype">Blood Type</label>
+                    <div class="rbi-field">
+                        <label for="add-bloodtype">Blood Type:</label>
                         <select id="add-bloodtype">
-                            <option value="">Unknown</option>
+                            <option value="" disabled selected>Select...</option>
                             <option value="A+">A+</option>
                             <option value="A-">A-</option>
                             <option value="B+">B+</option>
@@ -404,37 +518,103 @@
                             <option value="AB-">AB-</option>
                         </select>
                     </div>
-                    <div class="rm-field">
-                        <label for="add-civil-status">Civil Status</label>
-                        <select id="add-civil-status">
-                            <option value="">—</option>
-                            <option value="Single">Single</option>
-                            <option value="Married">Married</option>
-                            <option value="Widowed">Widowed</option>
-                            <option value="Separated">Separated</option>
-                        </select>
+                </div>
+
+                <div class="rbi-field rbi-field--full">
+                    <label for="add-occupation">Occupation:</label>
+                    <input id="add-occupation" type="text" placeholder="Type...">
+                </div>
+
+                <div class="rbi-field rbi-field--full">
+                    <label>Residence Address:</label>
+                    <div class="rbi-address-group">
+                        <input id="add-street-no" type="text" placeholder="Street No.">
+                        <input id="add-street-name" type="text" placeholder="Street Name">
                     </div>
                 </div>
 
-                <div class="rm-row">
-                    <div class="rm-field rm-field--checkbox">
-                        <input type="checkbox" id="add-pwd">
-                        <label for="add-pwd">Person with Disability (PWD)</label>
+                <div class="rbi-row">
+                    <div class="rbi-field">
+                        <label for="add-contact">Contact Number:</label>
+                        <input id="add-contact" type="text" placeholder="XXXXXXXXXX">
                     </div>
-                    <div class="rm-field rm-field--checkbox">
-                        <input type="checkbox" id="add-pregnant">
-                        <label for="add-pregnant">Pregnant</label>
+                    <div class="rbi-field">
+                        <label for="add-email">E-mail Address:</label>
+                        <input id="add-email" type="email" placeholder="sample@yahoo.com">
                     </div>
                 </div>
 
-                <div class="rm-field rm-field--full">
-                    <label for="add-medical-notes">Medical Notes</label>
-                    <textarea id="add-medical-notes" rows="3" placeholder="None"></textarea>
+                <!-- ═══ II. MEDICAL INFORMATION ═══ -->
+                <h3 class="rbi-section-heading">II. MEDICAL INFORMATION</h3>
+
+                <div class="rbi-row rbi-row--medical-toggles">
+                    <div class="rbi-toggle-group">
+                        <label class="rbi-toggle-label">Are you a Person with Disability (PWD)?</label>
+                        <div class="rbi-radio-pair">
+                            <label><input type="radio" name="add-pwd-radio" value="yes"> Yes</label>
+                            <label><input type="radio" name="add-pwd-radio" value="no" checked> No</label>
+                        </div>
+                        <div class="rbi-field rbi-pwd-detail" id="addPwdDetailField" style="display:none;">
+                            <label for="add-disability">Disability</label>
+                            <input id="add-disability" type="text" placeholder="________________">
+                        </div>
+                    </div>
+                    <div class="rbi-toggle-group">
+                        <label class="rbi-toggle-label">Are you taking any medications or maintenance?</label>
+                        <div class="rbi-radio-pair">
+                            <label><input type="radio" name="add-med-radio" value="yes"> Yes</label>
+                            <label><input type="radio" name="add-med-radio" value="no" checked> No</label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="rm-actions">
-                    <button type="submit" class="rm-btn rm-btn--save" id="addResidentBtn">Register Resident</button>
-                    <button type="button" class="rm-btn rm-btn--cancel" onclick="closeAddResidentModal()">Cancel</button>
+                <!-- Medication details (hidden by default) -->
+                <div class="rbi-medication-details" id="addMedicationDetails" style="display:none;">
+                    <div class="rbi-row rbi-row--3col">
+                        <div class="rbi-field">
+                            <label for="add-med-name">Name of Medication:</label>
+                            <input id="add-med-name" type="text" placeholder="Type">
+                        </div>
+                        <div class="rbi-field">
+                            <label for="add-med-dosage">Dosage:</label>
+                            <input id="add-med-dosage" type="text" placeholder="Type">
+                        </div>
+                        <div class="rbi-field rbi-field--small">
+                            <label for="add-med-qty">Qty:</label>
+                            <input id="add-med-qty" type="text" placeholder="Type">
+                        </div>
+                    </div>
+                    <div class="rbi-row">
+                        <div class="rbi-field">
+                            <label for="add-condition">Condition:</label>
+                            <select id="add-condition">
+                                <option value="" disabled selected>Select...</option>
+                                <option value="Hypertension">Hypertension</option>
+                                <option value="Diabetes">Diabetes</option>
+                                <option value="Asthma">Asthma</option>
+                                <option value="Tuberculosis">Tuberculosis</option>
+                                <option value="Heart Disease">Heart Disease</option>
+                                <option value="Kidney Disease">Kidney Disease</option>
+                                <option value="Arthritis">Arthritis</option>
+                                <option value="Thyroid Disorder">Thyroid Disorder</option>
+                                <option value="Cancer">Cancer</option>
+                                <option value="Epilepsy">Epilepsy</option>
+                                <option value="Anemia">Anemia</option>
+                                <option value="UTI">UTI</option>
+                                <option value="Pneumonia">Pneumonia</option>
+                                <option value="Dengue">Dengue</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="rbi-field" id="addConditionOtherField" style="display:none;">
+                            <label for="add-condition-other">Others, please specify</label>
+                            <input id="add-condition-other" type="text" placeholder="Others, please specify">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rbi-actions">
+                    <button class="submit-btn" type="submit" id="addResidentBtn">DONE</button>
                 </div>
             </form>
         </div>

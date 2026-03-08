@@ -45,6 +45,24 @@ document.addEventListener('DOMContentLoaded', () => {
         medicationDetails.style.display = r.value === 'yes' && r.checked ? 'flex' : 'none';
     }));
 
+    // ── Outside PH toggle (unlock nationality field) ──
+    const outsidePHCheckbox = document.getElementById('rbi-outside-ph');
+    const nationalityInput = document.getElementById('rbi-nationality');
+    if (outsidePHCheckbox && nationalityInput) {
+        outsidePHCheckbox.addEventListener('change', () => {
+            if (outsidePHCheckbox.checked) {
+                nationalityInput.readOnly = false;
+                nationalityInput.value = '';
+                nationalityInput.placeholder = 'Enter nationality';
+                nationalityInput.focus();
+            } else {
+                nationalityInput.readOnly = true;
+                nationalityInput.value = 'Filipino';
+                nationalityInput.placeholder = '';
+            }
+        });
+    }
+
     // ── Condition "Other" toggle ──
     const conditionSelect = document.getElementById('rbi-condition');
     const conditionOtherField = document.getElementById('conditionOtherField');
@@ -106,22 +124,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 3. Generate Health ID
-        const initials = (firstname.charAt(0) + surname.charAt(0)).toUpperCase();
-        const yearSuffix = new Date().getFullYear().toString().slice(-2);
-        let healthId = `B86${initials}${age}${yearSuffix}`;
+        // 3. Generate Health ID (B86 + 6 random uppercase letters)
+        function randomLetters(n) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+            for (let i = 0; i < n; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        }
+        let healthId = `B86${randomLetters(6)}`;
 
         try {
             let isUnique = false;
             let attempts = 0;
-            while (!isUnique && attempts < 5) {
+            while (!isUnique && attempts < 10) {
                 const existing = await db.collection('residents')
                     .where('healthId', '==', healthId).limit(1).get();
                 if (existing.empty) {
                     isUnique = true;
                 } else {
-                    const rnd = Math.floor(Math.random() * 900 + 100);
-                    healthId = `B86${initials}${age}${yearSuffix}${rnd}`;
+                    healthId = `B86${randomLetters(6)}`;
                     attempts++;
                 }
             }
@@ -192,6 +213,48 @@ document.addEventListener('DOMContentLoaded', () => {
                     location: 'RBI Form',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
+            }
+
+            // Auto-create maintenance log if resident is on medication
+            if (isMedication && medName) {
+                const medQtyNum = parseInt(medQty, 10) || 0;
+                const residentFullName = [firstname, surname].filter(Boolean).join(' ');
+                const today = new Date();
+                const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+                const logData = {
+                    date: dateStr,
+                    residentName: residentFullName,
+                    healthId: healthId,
+                    indication: condition || 'N/A',
+                    medicineName: medName,
+                    quantity: medQtyNum,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                // Try to deduct from medicine inventory
+                try {
+                    const medSnap = await db.collection('medicines').get();
+                    const medDoc = medSnap.docs.find(d => (d.data().name || '').toLowerCase() === medName.toLowerCase());
+
+                    if (medDoc) {
+                        const currentQty = medDoc.data().quantity;
+                        if (currentQty >= medQtyNum) {
+                            const batch = db.batch();
+                            batch.update(db.collection('medicines').doc(medDoc.id), {
+                                quantity: firebase.firestore.FieldValue.increment(-medQtyNum)
+                            });
+                            batch.set(db.collection('maintenanceLogs').doc(), logData);
+                            await batch.commit();
+                        } else {
+                            alert(`Insufficient stock for ${medName}. Available: ${currentQty}, Needed: ${medQtyNum}. Maintenance log was not created.`);
+                        }
+                    } else {
+                        alert(`Medicine "${medName}" not found in inventory. Maintenance log was not created.`);
+                    }
+                } catch (logErr) {
+                    console.warn('Could not create maintenance log:', logErr);
+                }
             }
 
             // 6. Show success modal

@@ -12,6 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let allLogs = []; 
 
+    // ── Populate medicine dropdown from Firestore ──
+    async function loadMedicineOptions() {
+        const medSelect = document.getElementById('log-medname');
+        if (!medSelect) return;
+        try {
+            const snap = await db.collection('medicines').orderBy('name').get();
+            snap.forEach(doc => {
+                const d = doc.data();
+                if (d.name) {
+                    const opt = document.createElement('option');
+                    opt.value = d.name;
+                    opt.textContent = d.name;
+                    medSelect.appendChild(opt);
+                }
+            });
+        } catch (err) { console.warn('Could not load medicines:', err); }
+    }
+    loadMedicineOptions();
+
     // ── 1. Fetch Data from Firestore ──────────────────────────
     async function loadLogs() {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading records...</td></tr>';
@@ -102,7 +121,46 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeMaintenanceModal = function() {
         maintenanceModal.style.display = 'none';
         maintenanceForm.reset();
+        const nameInput = document.getElementById('log-name');
+        if (nameInput) { nameInput.readOnly = false; nameInput.style.opacity = ''; }
     };
+
+    // ── Auto-populate resident name from Health ID ──
+    const logHealthIdInput = document.getElementById('log-healthid');
+    const logNameInput = document.getElementById('log-name');
+    let healthIdTimeout = null;
+
+    if (logHealthIdInput && logNameInput) {
+        logHealthIdInput.addEventListener('input', () => {
+            clearTimeout(healthIdTimeout);
+            const hid = logHealthIdInput.value.trim();
+            if (!hid) {
+                logNameInput.value = '';
+                logNameInput.readOnly = false;
+                logNameInput.style.opacity = '';
+                return;
+            }
+            healthIdTimeout = setTimeout(async () => {
+                try {
+                    const snap = await db.collection('residents')
+                        .where('healthId', '==', hid).limit(1).get();
+                    if (!snap.empty) {
+                        const r = snap.docs[0].data();
+                        const fullName = [r.firstName, r.surname].filter(Boolean).join(' ');
+                        logNameInput.value = fullName;
+                        logNameInput.readOnly = true;
+                        logNameInput.style.opacity = '0.7';
+                    } else {
+                        logNameInput.value = '';
+                        logNameInput.readOnly = false;
+                        logNameInput.style.opacity = '';
+                    }
+                } catch (err) {
+                    console.warn('Health ID lookup failed:', err);
+                }
+            }, 400);
+        });
+    }
 
     window.editLog = function(docId) {
         const log = allLogs.find(l => l.id === docId);

@@ -33,9 +33,10 @@
     };
 
     function populateUI(fullName, email, role) {
+        const displayName = (fullName && fullName.trim()) || (email ? email.split('@')[0] : 'User');
         const sidebarName = document.querySelector('.profile-card h2');
         const sidebarRole = document.querySelector('.profile-card p');
-        if (sidebarName) sidebarName.textContent = fullName;
+        if (sidebarName) sidebarName.textContent = displayName;
         if (sidebarRole) sidebarRole.textContent = roleLabels[role] || role;
 
 
@@ -44,10 +45,10 @@
         const bannerEmail = document.querySelector('.profile-banner__info p');
         const bannerRole = document.querySelector('.profile-banner__role');
         const bannerAvatar = document.querySelector('.profile-banner__avatar img');
-        if (bannerName) bannerName.textContent = fullName;
+        if (bannerName) bannerName.textContent = displayName;
         if (bannerEmail) bannerEmail.textContent = email;
         if (bannerRole) bannerRole.textContent = roleLabels[role] || role;
-        if (bannerAvatar) bannerAvatar.alt = fullName;
+        if (bannerAvatar) bannerAvatar.alt = displayName;
     }
 
     // Pre-fill from sessionStorage so the name & avatar never flicker
@@ -95,7 +96,7 @@
 
             const data = doc.data();
             const role = data.role;         // "staff", "bhw", or "admin"
-            const fullName = data.fullName || user.displayName || 'User';
+            const fullName = (data.fullName && data.fullName.trim()) || user.displayName || (user.email ? user.email.split('@')[0] : 'User');
             const email = data.email || user.email || '';
 
             // Role check — admin can access staff, bhw, AND admin-only pages
