@@ -1293,7 +1293,8 @@ h1 {
     }
 
     .profile-link {
-        display: none;
+        display: inline-block;
+        font-size: 0.85rem;
     }
 
     .sidebar-nav {
@@ -1651,12 +1652,9 @@ h1 {
         padding: 1.25rem 1rem;
     }
 
-    .about-cards {
+    .about-cards,
+    .vision-mission-cards {
         grid-template-columns: 1fr;
-    }
-
-    .about-card {
-        padding: 1.25rem;
     }
 
     .report-bar-chart {
@@ -2159,18 +2157,18 @@ h1 {
 
 .about-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5rem;
+    max-width: 1430px;
+    margin: 0 auto;
 }
 
-.about-card {
-    background: #dce7f9;
-    border-radius: 1.75rem;
-    padding: 1.75rem 1.75rem;
-    font-size: 0.88rem;
-    line-height: 1.65;
-    color: #1e2230;
-    text-align: justify;
+.about-card-img {
+    width: 100%;
+    max-height: 750px;
+    object-fit: contain;
+    display: block;
+    border-radius: 1.25rem;
 }
 
 .guidelines-cards {
@@ -2198,32 +2196,18 @@ h1 {
 /* ── Vision & Mission Cards ─────────────────────────────── */
 .vision-mission-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5rem;
+    max-width: 1430px;
+    margin: 0 auto;
 }
 
-.vm-card {
-    background: #dce7f9;
-    border-radius: 1.75rem;
-    padding: 1.75rem 1.75rem;
-    display: flex;
-    flex-direction: column;
-}
-
-.vm-card h3 {
-    font-size: 1.1rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    color: #1e2230;
-    margin: 0 0 0.6rem;
-}
-
-.vm-card p {
-    font-size: 0.88rem;
-    line-height: 1.65;
-    color: #1e2230;
-    text-align: justify;
-    margin: 0;
+.vm-card-img {
+    width: 100%;
+    max-height: 750px;
+    object-fit: contain;
+    display: block;
+    border-radius: 1.25rem;
 }
 
 /* ── Organizational Chart ──────────────────────────────── */
@@ -2995,41 +2979,63 @@ h1 {
     font-size: 1.25rem;
     font-weight: 700;
     color: #1e2230;
+    margin-bottom: 0.75rem;
 }
 
 .activity-table-wrap {
-    background: #dce7f9;
+    background: #f0f4fc;
     border-radius: 1.25rem;
-    padding: 1.25rem 1.5rem;
+    padding: 1.5rem 1.75rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .activity-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+}
+
+.activity-table thead th {
+    padding: 0.65rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7a99;
+    text-align: left;
+    border-bottom: 2px solid #d4deef;
 }
 
 .activity-table td {
     padding: 0.85rem 1rem;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: #2c2f36;
 }
 
 .activity-table tr:not(.activity-table__empty) {
     background: #ffffff;
     border-radius: 0.75rem;
+    transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.activity-table tr:not(.activity-table__empty):hover {
+    background: #e8eefb;
+    box-shadow: 0 2px 8px rgba(42, 76, 156, 0.08);
 }
 
 .activity-table tr:not(.activity-table__empty) td:first-child {
     border-radius: 0.75rem 0 0 0.75rem;
     font-weight: 600;
+    color: #3d5a99;
 }
 
 .activity-table tr:not(.activity-table__empty) td:last-child {
     border-radius: 0 0.75rem 0.75rem 0;
+    color: #5a6a85;
 }
 
 .activity-table__empty td {
-    height: 0.6rem;
+    height: 0.5rem;
 }
 
 /* ══════════════════════════════════════════════════════════
