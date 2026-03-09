@@ -65,17 +65,6 @@
                     </span>
                     <span class="nav-item__label">Residents' Maintenance</span>
                 </a>
-                <a href="staff-reports.html" class="nav-item" title="Reports">
-                    <span class="nav-item__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 20v-6" />
-                            <path d="M12 20V8" />
-                            <path d="M18 20v-10" />
-                            <path d="M4 20h16" />
-                        </svg>
-                    </span>
-                    <span class="nav-item__label">Reports</span>
-                </a>
                 <a href="staff-about.html" class="nav-item" title="About">
                     <span class="nav-item__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -308,6 +297,39 @@
         </div>
     </div>
 
+    <!-- Delete account confirmation modal -->
+    <div id="deleteModal" class="modal-overlay" style="display:none;">
+        <div class="modal admin-modal">
+            <div class="admin-modal__header">
+                <div class="admin-modal__icon admin-modal__icon--delete" style="background-color: #fee2e2; color: #dc2626;">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <div>
+                    <h2>Delete Account</h2>
+                    <p class="admin-modal__desc">This action cannot be undone. The account and all related data will be permanently removed.</p>
+                </div>
+            </div>
+
+            <div class="admin-modal__divider"></div>
+
+            <div id="deleteModalDetails" class="admin-modal__details"></div>
+
+            <div class="admin-modal__info-box" style="border-color: #fecaca; background-color: #fef2f2; color: #991b1b;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span><strong>Warning:</strong> Deleting this account is permanent. Make sure this is what you intend to do.</span>
+            </div>
+
+            <div class="admin-modal__actions">
+                <button class="btn btn--cancel" onclick="closeDeleteModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn--reject" id="confirmDeleteBtn" style="background-color: #dc2626; border-color: #dc2626;">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast notification -->
     <div id="toastContainer" class="admin-toast-container"></div>
 
@@ -325,13 +347,16 @@
         const approveModal = document.getElementById('approveModal');
         const rejectModal = document.getElementById('rejectModal');
         const retrieveModal = document.getElementById('retrieveModal');
+        const deleteModal = document.getElementById('deleteModal');
         const modalDetails = document.getElementById('modalDetails');
         const rejectModalDetails = document.getElementById('rejectModalDetails');
         const retrieveModalDetails = document.getElementById('retrieveModalDetails');
+        const deleteModalDetails = document.getElementById('deleteModalDetails');
         const roleSelect = document.getElementById('roleSelect');
         const confirmApproveBtn = document.getElementById('confirmApproveBtn');
         const confirmRejectBtn = document.getElementById('confirmRejectBtn');
         const confirmRetrieveBtn = document.getElementById('confirmRetrieveBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         const searchInput = document.getElementById('searchRequests');
         const toastContainer = document.getElementById('toastContainer');
 
@@ -340,6 +365,7 @@
         let pendingRejectId = null;
         let pendingRetrieveId = null;
         let pendingRetrieveEmail = null;
+        let pendingDeleteId = null;
         let allRequestsCache = [];
 
         // ── Toast notifications ───────────────────────────
@@ -477,6 +503,9 @@
                                 <i class="fas fa-times"></i> Reject
                             </button>
                         ` : ''}
+                        <button class="admin-action-btn admin-action-btn--delete" onclick="openDeleteModal('${d.id}', '${escAttr(d.fullName)}', '${escAttr(d.email)}')">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
                     </div>
                 `;
                 requestsList.appendChild(card);
@@ -623,6 +652,7 @@
         approveModal.addEventListener('click', (e) => { if (e.target === approveModal) closeModal(); });
         rejectModal.addEventListener('click', (e) => { if (e.target === rejectModal) closeRejectModal(); });
         retrieveModal.addEventListener('click', (e) => { if (e.target === retrieveModal) closeRetrieveModal(); });
+        deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) closeDeleteModal(); });
 
         // ── Retrieval approval modal ─────────────────────
         function openRetrieveModal(docId, name, email) {
@@ -677,6 +707,45 @@
             } finally {
                 confirmRetrieveBtn.disabled = false;
                 confirmRetrieveBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Approve & Send Reset';
+            }
+        });
+
+        // ── Delete modal ──────────────────────────────────
+        function openDeleteModal(docId, name, email) {
+            pendingDeleteId = docId;
+            deleteModalDetails.innerHTML = `
+                <div class="admin-modal__user-preview">
+                    <div class="admin-modal__user-avatar" style="background-color: #fee2e2; color: #dc2626;">${(name || '?').charAt(0).toUpperCase()}</div>
+                    <div>
+                        <strong>${escHtml(name)}</strong>
+                        <p>${escHtml(email)}</p>
+                    </div>
+                </div>`;
+            deleteModal.style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            deleteModal.style.display = 'none';
+            pendingDeleteId = null;
+        }
+
+        confirmDeleteBtn.addEventListener('click', async () => {
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+            try {
+                // Delete the account request document from Firestore
+                await db.collection('accountRequests').doc(pendingDeleteId).delete();
+                
+                closeDeleteModal();
+                showToast('Account has been permanently deleted.', 'success');
+                loadRequests();
+                loadStats();
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            } finally {
+                confirmDeleteBtn.disabled = false;
+                confirmDeleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Delete Account';
             }
         });
 
