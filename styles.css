@@ -965,6 +965,14 @@ h1 {
     border-radius: inherit;
 }
 
+.meds-count {
+    min-width: 32px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1d4ed8;
+    text-align: right;
+}
+
 .dashboard-header {
     background: linear-gradient(180deg, #cfe1ff 0%, #fef9f0 90%);
     margin: 0 -3rem;

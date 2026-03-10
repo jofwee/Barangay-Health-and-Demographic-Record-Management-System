@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
             
             applyFiltersAndRender();
-            updateMedicationsNeeds(allLogs); // Update the progress bars
+            updateMedicationsNeeds(); // Update the progress bars from residents' medication data
         } catch (error) {
             console.error('Error fetching maintenance logs:', error);
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Failed to load records.</td></tr>';
@@ -370,49 +370,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── 5. Dynamic Progress Bars (Residents' Medications Needs)
-    function updateMedicationsNeeds(logs) {
-        if (logs.length === 0) {
-            medsNeedsList.innerHTML = '<li><p style="color: #666; font-size: 0.9rem;">No data available yet.</p></li>';
-            return;
-        }
+    // Pulls from residents' medication data (RBI form), not maintenance logs
+    async function updateMedicationsNeeds() {
+        try {
+            const snapshot = await db.collection('residents')
+                .where('isMedication', '==', true)
+                .get();
 
-        // Count frequency of each medicine requested
-        const counts = {};
-        let maxCount = 0;
-
-        logs.forEach(log => {
-            const medName = log.medicineName;
-            counts[medName] = (counts[medName] || 0) + 1;
-            if (counts[medName] > maxCount) {
-                maxCount = counts[medName];
+            if (snapshot.empty) {
+                medsNeedsList.innerHTML = '<li><p style="color: #666; font-size: 0.9rem;">No data available yet.</p></li>';
+                return;
             }
-        });
 
-        // Convert to array and sort by highest need
-        const sortedMeds = Object.keys(counts).map(name => {
-            return {
-                name: name,
+            // Count frequency of each medication from resident records
+            const counts = {};
+            let maxCount = 0;
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const rawMedName = (data.medicationName || '').trim();
+                if (!rawMedName) return;
+                // Split comma-separated medications into individual entries
+                const meds = rawMedName.split(',').map(m => m.trim()).filter(m => m);
+                meds.forEach(raw => {
+                    // Normalize: first letter uppercase, rest lowercase
+                    const medName = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+                    counts[medName] = (counts[medName] || 0) + 1;
+                    if (counts[medName] > maxCount) {
+                        maxCount = counts[medName];
+                    }
+                });
+            });
+
+            if (Object.keys(counts).length === 0) {
+                medsNeedsList.innerHTML = '<li><p style="color: #666; font-size: 0.9rem;">No data available yet.</p></li>';
+                return;
+            }
+
+            // Convert to array and sort by highest need
+            const sortedMeds = Object.keys(counts).map(name => ({
+                name,
                 count: counts[name],
-                // Calculate percentage based on the highest requested medicine = 100%
                 percentage: Math.round((counts[name] / maxCount) * 100)
-            };
-        }).sort((a, b) => b.count - a.count);
+            })).sort((a, b) => b.count - a.count);
 
-        // Take top 5 to fit the panel perfectly
-        const top5 = sortedMeds.slice(0, 5);
+            // Take top 5 to fit the panel
+            const top5 = sortedMeds.slice(0, 5);
 
-        // Render HTML
-        medsNeedsList.innerHTML = '';
-        top5.forEach(med => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span class="meds-label">${escapeHTML(med.name)}</span>
-                <div class="meds-progress">
-                    <div class="meds-progress__fill" style="--value: ${med.percentage}%;"></div>
-                </div>
-            `;
-            medsNeedsList.appendChild(li);
-        });
+            // Render HTML with count numbers
+            medsNeedsList.innerHTML = '';
+            top5.forEach(med => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="meds-label">${escapeHTML(med.name)}</span>
+                    <div class="meds-progress">
+                        <div class="meds-progress__fill" style="--value: ${med.percentage}%;"></div>
+                    </div>
+                    <span class="meds-count">${med.count}</span>
+                `;
+                medsNeedsList.appendChild(li);
+            });
+        } catch (error) {
+            console.error('Error loading medication needs:', error);
+            medsNeedsList.innerHTML = '<li><p style="color: #666; font-size: 0.9rem;">Failed to load medication needs.</p></li>';
+        }
     }
 
     // Run the fetch when the page loads

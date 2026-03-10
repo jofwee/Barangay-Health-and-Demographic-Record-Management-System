@@ -215,48 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Auto-create maintenance log if resident is on medication
-            if (isMedication && medName) {
-                const medQtyNum = parseInt(medQty, 10) || 0;
-                const residentFullName = [firstname, surname].filter(Boolean).join(' ');
-                const today = new Date();
-                const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-
-                const logData = {
-                    date: dateStr,
-                    residentName: residentFullName,
-                    healthId: healthId,
-                    indication: condition || 'N/A',
-                    medicineName: medName,
-                    quantity: medQtyNum,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                // Try to deduct from medicine inventory
-                try {
-                    const medSnap = await db.collection('medicines').get();
-                    const medDoc = medSnap.docs.find(d => (d.data().name || '').toLowerCase() === medName.toLowerCase());
-
-                    if (medDoc) {
-                        const currentQty = medDoc.data().quantity;
-                        if (currentQty >= medQtyNum) {
-                            const batch = db.batch();
-                            batch.update(db.collection('medicines').doc(medDoc.id), {
-                                quantity: firebase.firestore.FieldValue.increment(-medQtyNum)
-                            });
-                            batch.set(db.collection('maintenanceLogs').doc(), logData);
-                            await batch.commit();
-                        } else {
-                            alert(`Insufficient stock for ${medName}. Available: ${currentQty}, Needed: ${medQtyNum}. Maintenance log was not created.`);
-                        }
-                    } else {
-                        alert(`Medicine "${medName}" not found in inventory. Maintenance log was not created.`);
-                    }
-                } catch (logErr) {
-                    console.warn('Could not create maintenance log:', logErr);
-                }
-            }
-
             // 6. Show success modal
             showSuccessModal(healthId);
             rbiForm.reset();
