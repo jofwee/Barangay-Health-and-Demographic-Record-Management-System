@@ -47,6 +47,97 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // ── 4. Medications by Category (uses resident RBI data) ──
+            try {
+                const resSnap = await db.collection('residents').get();
+                const residents = resSnap.docs.map(d => d.data());
+
+                const medCatsContainer = document.getElementById('medCatsContainer');
+
+                function residentMatchesCategoryForReports(r, category) {
+                    if (!category || category === 'All') return true;
+                    const sex = (r.sex || '').toString().toLowerCase();
+                    const isPwd = !!r.isPwd;
+                    const classification = (r.classification || '').toString().toLowerCase();
+                    const age = Number(r.age) || 0;
+                    switch (category) {
+                        case 'PWD': return isPwd === true;
+                        case 'Female': return sex === 'female';
+                        case 'Male': return sex === 'male';
+                        case 'Infant': return classification.includes('infant') || age < 5;
+                        case 'Kids': return classification.includes('kid') || (age >=5 && age <= 12);
+                        case 'Teenagers': return classification.includes('teen') || (age >=13 && age <= 19);
+                        case 'Adult': return classification.includes('adult') || (age >=20 && age <= 59);
+                        case 'Senior': return classification.includes('senior') || age >= 60;
+                        default: return true;
+                    }
+                }
+                // Render multiple static panels — one per category — into #medCatsContainer
+                function renderAllMedCategoryPanels() {
+                    if (!medCatsContainer) return;
+                    medCatsContainer.innerHTML = '';
+
+                    const categories = ['All','Infant','Kids','Teenagers','Adult','Senior','PWD','Female','Male'];
+
+                    categories.forEach(category => {
+                        const counts = {};
+                        residents.forEach(r => {
+                            if (!r || !r.isMedication) return;
+                            if (!residentMatchesCategoryForReports(r, category)) return;
+                            const raw = (r.medicationName || '').trim();
+                            if (!raw) return;
+                            raw.split(',').map(s => s.trim()).filter(Boolean).forEach(m => {
+                                const name = m.charAt(0).toUpperCase() + m.slice(1).toLowerCase();
+                                counts[name] = (counts[name] || 0) + 1;
+                            });
+                        });
+
+                        const items = Object.keys(counts).map(n => ({ name: n, count: counts[n] })).sort((a,b)=>b.count-a.count);
+
+                        const panel = document.createElement('div');
+                        panel.className = 'meds-panel';
+                        const heading = document.createElement('h4');
+                        heading.textContent = category === 'All' ? 'All Residents' : category;
+                        panel.appendChild(heading);
+
+                        if (items.length === 0) {
+                            const p = document.createElement('p');
+                            p.style.color = '#666';
+                            p.style.marginTop = '0.5rem';
+                            p.textContent = 'No medicines found for this category.';
+                            panel.appendChild(p);
+                            medCatsContainer.appendChild(panel);
+                            return;
+                        }
+
+                        const max = Math.max(...items.map(i=>i.count),1);
+                        const list = document.createElement('ul');
+                        list.className = 'meds-list';
+
+                        // Show top 5 for each category, show all for 'All'
+                        const limit = category === 'All' ? items.length : Math.min(5, items.length);
+                        for (let i = 0; i < limit; i++) {
+                            const it = items[i];
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <span class="meds-label">${escHTML(it.name)}</span>
+                                <div class="meds-progress"><div class="meds-progress__fill" style="--value:${Math.round((it.count/max)*100)}%"></div></div>
+                                <span class="meds-count">${it.count}</span>
+                            `;
+                            list.appendChild(li);
+                        }
+
+                        panel.appendChild(list);
+                        medCatsContainer.appendChild(panel);
+                    });
+                }
+
+                // Static visual report: render panels for all categories (no interactive controls)
+                renderAllMedCategoryPanels();
+            } catch (err) {
+                console.error('Error loading medication category report:', err);
+            }
+
             // ── 2. Medicine Distribution Report table ─────────
             if (distReportBody) {
                 if (logs.length === 0) {

@@ -799,6 +799,35 @@ h1 {
     color: #ffffff;
 }
 
+/* Category pill buttons (match site theme) */
+.cat-pill-btn {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(16, 33, 80, 0.12);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    background: #ffffff;
+    color: #1f2d40;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 20px rgba(40, 67, 136, 0.06);
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 120ms ease;
+}
+.cat-pill-btn:hover {
+    transform: translateY(-2px);
+}
+.cat-pill-btn.active {
+    background: linear-gradient(180deg, #1f2d40 0%, #111826 100%);
+    color: #ffffff;
+    border-color: rgba(16,33,80,0.95);
+    box-shadow: 0 14px 30px rgba(18,34,74,0.16);
+}
+
 .inventory-table-card {
     background: #ffffff;
     border-radius: 1.75rem;
@@ -924,23 +953,29 @@ h1 {
     border-radius: 1.5rem;
     padding: 1.75rem;
     box-shadow: 0 18px 45px rgba(26, 44, 90, 0.12);
+    margin-bottom: 1rem;
 }
 
-.meds-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin: 0;
-    padding: 0;
+.meds-panel h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.05rem;
+    color: #0f2546;
 }
 
+.meds-panel p {
+    margin: 0.5rem 0 0.25rem 0;
+}
 .meds-list li {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
-
+.meds-list li {
+    margin-bottom: 0.6rem;
+}
+.meds-list li:last-child {
+    margin-bottom: 0;
+}
 .meds-label {
     width: 140px;
     font-weight: 600;
@@ -2017,20 +2052,20 @@ h1 {
 .report-tables {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 1.75rem;
+    gap: 1rem;
 }
 
 .report-card {
     background: #ffffff;
-    border-radius: 1.75rem;
-    padding: 1.5rem;
-    box-shadow: 0 18px 45px rgba(26, 44, 90, 0.12);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    box-shadow: 0 12px 30px rgba(26, 44, 90, 0.10);
 }
 
 .report-card h3 {
     font-size: 1.15rem;
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
 }
 
 .report-table {
@@ -2088,6 +2123,58 @@ h1 {
     height: 220px;
     padding-left: 4.5rem;
     position: relative;
+}
+
+/* Space between stacked report-tables sections (adds breathing room above Medications by Category) */
+.report-tables + .report-tables {
+    margin-top: 1.5rem;
+}
+
+/* Compact two-column layout for Medications by Category panels */
+#medCatsContainer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+/* Make the first (All Residents) panel span both columns */
+#medCatsContainer .meds-panel:first-child {
+    grid-column: 1 / -1;
+}
+
+/* Compact styles only for panels inside the medCats container */
+#medCatsContainer .meds-panel {
+    padding: 1rem;
+    border-radius: 1.25rem;
+}
+
+#medCatsContainer .meds-panel h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+#medCatsContainer .meds-label {
+    width: 120px;
+    font-size: 0.95rem;
+}
+
+#medCatsContainer .meds-progress {
+    height: 14px;
+}
+
+#medCatsContainer .meds-count {
+    min-width: 28px;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 960px) {
+    #medCatsContainer {
+        grid-template-columns: 1fr;
+    }
+    #medCatsContainer .meds-panel:first-child {
+        grid-column: auto;
+    }
 }
 
 .report-bar-chart__y {

@@ -382,49 +382,109 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Count frequency of each medication from resident records
-            const counts = {};
-            let maxCount = 0;
+            // Medicine category mapping (edit as needed) — used for pre-defined lists
+            const medicineCategories = {
+                'All': ['Cefalexin', 'Alaxan', 'Ceterizine', 'Lagundi', 'Amlodipine', 'Metformin'],
+                'PWD': ['Alaxan'],
+                'Female': ['Ceterizine'],
+                'Male': ['Lagundi'],
+                'Kids': ['Ceterizine', 'Lagundi'],
+                'Adult': ['Cefalexin', 'Alaxan', 'Ceterizine', 'Lagundi', 'Amlodipine', 'Metformin'],
+                'Senior': ['Cefalexin', 'Amlodipine']
+            };
 
+            // Determine selected category from button group
+            let selectedCategory = 'All';
+            const btnGroup = document.getElementById('medsCategoryBtnGroup');
+            if (btnGroup) {
+                const activeBtn = btnGroup.querySelector('.cat-pill-btn.active');
+                if (activeBtn) selectedCategory = activeBtn.getAttribute('data-category') || 'All';
+            }
+
+            // Helper: decide whether a resident doc matches the selected category
+            function residentMatchesCategory(data, category) {
+                if (!category || category === 'All') return true;
+                const sex = (data.sex || '').toString().toLowerCase();
+                const isPwd = !!data.isPwd;
+                const classification = (data.classification || '').toString().toLowerCase();
+                const age = Number(data.age) || 0;
+
+                    switch (category) {
+                        case 'PWD':
+                            return isPwd === true;
+                        case 'Female':
+                            return sex === 'female';
+                        case 'Male':
+                            return sex === 'male';
+                        case 'Infant':
+                            return classification.includes('infant') || age < 5;
+                        case 'Kids':
+                            return classification.includes('kid') || (age >= 5 && age <= 12);
+                        case 'Teenagers':
+                            return classification.includes('teen') || (age >= 13 && age <= 19);
+                        case 'Adult':
+                            return classification.includes('adult') || (age >= 20 && age <= 59);
+                        case 'Senior':
+                            return classification.includes('senior') || age >= 60;
+                        default:
+                            return true;
+                    }
+            }
+
+            // Count frequency of each medication from resident records but only for residents matching the category
+            const counts = {};
             snapshot.forEach(doc => {
                 const data = doc.data();
+                if (!data || !data.isMedication) return;
+                if (!residentMatchesCategory(data, selectedCategory)) return;
+
                 const rawMedName = (data.medicationName || '').trim();
                 if (!rawMedName) return;
-                // Split comma-separated medications into individual entries
                 const meds = rawMedName.split(',').map(m => m.trim()).filter(m => m);
                 meds.forEach(raw => {
-                    // Normalize: first letter uppercase, rest lowercase
                     const medName = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
                     counts[medName] = (counts[medName] || 0) + 1;
-                    if (counts[medName] > maxCount) {
-                        maxCount = counts[medName];
-                    }
                 });
             });
 
             if (Object.keys(counts).length === 0) {
-                medsNeedsList.innerHTML = '<li><p style="color: #666; font-size: 0.9rem;">No data available yet.</p></li>';
+                medsNeedsList.innerHTML = `<li><p style="color: #666; font-size: 0.9rem;">No medicines found for ${selectedCategory}.</p></li>`;
                 return;
             }
 
-            // Convert to array and sort by highest need
-            const sortedMeds = Object.keys(counts).map(name => ({
-                name,
-                count: counts[name],
-                percentage: Math.round((counts[name] / maxCount) * 100)
-            })).sort((a, b) => b.count - a.count);
+            // Build meds list: for 'All' show all meds; for other categories prefer mapped list but fallback to counts
+            let medsInCategory = [];
+            if (selectedCategory === 'All') {
+                medsInCategory = Object.keys(counts).map(name => ({ name, count: counts[name] })).sort((a, b) => b.count - a.count);
+            } else {
+                const mapped = medicineCategories[selectedCategory] || [];
+                medsInCategory = mapped
+                    .map(name => ({ name, count: counts[name] || 0 }))
+                    .filter(m => m.count > 0)
+                    .sort((a, b) => b.count - a.count);
+                // If mapping yields nothing, fall back to any meds present in counts
+                if (medsInCategory.length === 0) {
+                    medsInCategory = Object.keys(counts).map(name => ({ name, count: counts[name] })).sort((a, b) => b.count - a.count).slice(0, 5);
+                } else {
+                    medsInCategory = medsInCategory.slice(0, 5);
+                }
+            }
 
-            // Take top 5 to fit the panel
-            const top5 = sortedMeds.slice(0, 5);
-
-            // Render HTML with count numbers
             medsNeedsList.innerHTML = '';
-            top5.forEach(med => {
+            if (medsInCategory.length === 0) {
+                medsNeedsList.innerHTML = `<li><p style="color: #666; font-size: 0.9rem;">No medicines found for ${selectedCategory}.</p></li>`;
+                return;
+            }
+
+            // Find max count for progress bar
+            const maxCount = medsInCategory[0].count;
+
+            medsInCategory.forEach(med => {
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <span class="meds-label">${escapeHTML(med.name)}</span>
                     <div class="meds-progress">
-                        <div class="meds-progress__fill" style="--value: ${med.percentage}%;"></div>
+                        <div class="meds-progress__fill" style="--value: ${maxCount ? Math.round((med.count / maxCount) * 100) : 0}%;"></div>
                     </div>
                     <span class="meds-count">${med.count}</span>
                 `;
@@ -438,4 +498,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Run the fetch when the page loads
     loadLogs();
+
+    // Add event listeners for category pill buttons after DOM is ready
+    setTimeout(() => {
+        const btnGroup = document.getElementById('medsCategoryBtnGroup');
+        if (btnGroup) {
+            btnGroup.querySelectorAll('.cat-pill-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    btnGroup.querySelectorAll('.cat-pill-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    updateMedicationsNeeds();
+                });
+            });
+        }
+    }, 500);
 });
