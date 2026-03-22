@@ -162,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p><strong>Place of Birth:</strong> ${escapeHTML(r.placeOfBirth || '—')}</p>
                 <p><strong>Nationality:</strong> ${escapeHTML(r.nationality || 'Filipino')}</p>
                 <p><strong>Occupation:</strong> ${escapeHTML(r.occupation || '—')}</p>
+                <p><strong>Head of Family:</strong> ${r.isHead ? 'Yes' : 'No'}</p>
             </div>
 
             <div class="view-section">

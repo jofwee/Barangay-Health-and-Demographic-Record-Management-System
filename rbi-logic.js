@@ -186,6 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 placeOfBirth,
                 nationality,
                 outsidePH,
+                // Head of family checkbox (from the form)
+                isHead: document.getElementById('rbi-head-family')?.checked || false,
                 sex,
                 civilStatus,
                 bloodType,
