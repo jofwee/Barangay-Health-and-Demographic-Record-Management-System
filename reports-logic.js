@@ -359,12 +359,27 @@ document.addEventListener('DOMContentLoaded', () => {
             exportBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Generating...';
 
             try {
-                const canvas = await html2canvas(section, {
+                // Clone the section for off-screen rendering
+                const clone = section.cloneNode(true);
+                clone.style.position = 'absolute';
+                clone.style.left = '-9999px';
+                clone.style.top = '0';
+                clone.style.width = section.offsetWidth + 'px';
+                document.body.appendChild(clone);
+
+                // Hide the export button in the clone
+                const exportBtnClone = clone.querySelector('#exportPdfBtn');
+                if (exportBtnClone) exportBtnClone.style.display = 'none';
+
+                const canvas = await html2canvas(clone, {
                     scale: 2,
                     useCORS: true,
                     backgroundColor: '#f5f6fa',
                     logging: false
                 });
+
+                // Remove clone after capture
+                document.body.removeChild(clone);
 
                 const { jsPDF } = window.jspdf;
                 const imgData = canvas.toDataURL('image/png');

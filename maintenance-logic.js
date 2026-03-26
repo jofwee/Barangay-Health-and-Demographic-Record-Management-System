@@ -512,4 +512,84 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }, 500);
+
+    // ── 6. Export PDF ──────────────────────────────────────────
+    const exportBtn = document.getElementById('exportPdfBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            const mainContent = document.querySelector('.maintenance-content');
+            if (!mainContent) return;
+
+            exportBtn.disabled = true;
+            const origText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Generating...';
+
+            try {
+                // Clone the content for off-screen rendering
+                const clone = mainContent.cloneNode(true);
+                clone.style.position = 'absolute';
+                clone.style.left = '-9999px';
+                clone.style.top = '0';
+                clone.style.width = mainContent.offsetWidth + 'px';
+                document.body.appendChild(clone);
+
+                // Hide elements in the clone
+                const controlsClone = clone.querySelector('.inventory-controls');
+                const headerClone = clone.querySelector('.maintenance-header');
+                const categoryBtnsClone = clone.querySelector('#medsCategoryBtnGroup');
+                const exportBtnClone = clone.querySelector('#exportPdfBtn');
+                const actionCells = clone.querySelectorAll('.inventory-row-actions, th:last-child, td:last-child');
+
+                if (controlsClone) controlsClone.style.display = 'none';
+                if (headerClone) headerClone.style.display = 'none';
+                if (categoryBtnsClone) categoryBtnsClone.style.display = 'none';
+                if (exportBtnClone) exportBtnClone.style.display = 'none';
+                actionCells.forEach(el => el.style.display = 'none');
+
+                const canvas = await html2canvas(clone, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#f5f6fa',
+                    logging: false
+                });
+
+                // Remove clone after capture
+                document.body.removeChild(clone);
+
+                const { jsPDF } = window.jspdf;
+                const imgData = canvas.toDataURL('image/png');
+                const imgW = canvas.width;
+                const imgH = canvas.height;
+
+                const isLandscape = imgW > imgH;
+                const pdf = new jsPDF({
+                    orientation: isLandscape ? 'landscape' : 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageW = pdf.internal.pageSize.getWidth();
+                const pageH = pdf.internal.pageSize.getHeight();
+                const margin = 10;
+                const maxW = pageW - margin * 2;
+                const maxH = pageH - margin * 2;
+                const ratio = Math.min(maxW / imgW, maxH / imgH);
+                const w = imgW * ratio;
+                const h = imgH * ratio;
+                const x = (pageW - w) / 2;
+                const y = margin;
+
+                pdf.addImage(imgData, 'PNG', x, y, w, h);
+
+                const dateStr = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+                pdf.save(`Residents-Maintenance_${dateStr}.pdf`);
+            } catch (err) {
+                console.error('PDF export error:', err);
+                alert('Failed to generate PDF. Please try again.');
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = origText;
+            }
+        });
+    }
 });
